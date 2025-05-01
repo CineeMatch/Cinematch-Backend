@@ -1,9 +1,9 @@
-import { createChallenge, deleteChallenge, getChallengeByID, getChallenges, getChallengesByUser, updateChallengeStatusAnswered, updateChallengeStatusCompleted } from "../controllers/challengeController.js";
+import { createChallenge, deleteChallenge, getAllChallenges, getChallengeByID, getChallengesByUser, updateChallengeStatusAnswered, updateChallengeStatusCompleted } from "../controllers/challengeController.js";
 import express from "express";
 
 const router = express.Router();
 
-router.route("/challenges").get( getChallenges);
+router.route("/challenges").get( getAllChallenges);
 router.route("/challenge/:id").get( getChallengeByID);
 router.route("/challenges/user").get( getChallengesByUser);
 router.route("/challenge/create").post(createChallenge);

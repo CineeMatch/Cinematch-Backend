@@ -1,6 +1,6 @@
-import Like from "../models/like";
+import Like from "../models/like.js";
 
-export const getLikes = async (req, res) => {
+export const getAllLikes = async (req, res) => {
     try {
       const likes = await Like.findAll();
       return res.status(200).json(likes);
@@ -12,7 +12,7 @@ export const getLikes = async (req, res) => {
 
   export const getLikesByPost=async(req,res)=>{
     try {
-        const likes=await Like.findAll({where:{post_id:req.params.post_id}});
+        const likes=await Like.findAll({where:{post_id:req.params.id}});
         return res.status(200).json({"likes":likes, "likeCount":likes.length});
     } catch (error) {
         console.error('Fetch Error:', error);
@@ -23,7 +23,7 @@ export const getLikes = async (req, res) => {
     export const getUserLikeOnPost=async(req,res)=>{
       const user=req.user.id
       try {
-          const like=await Like.findOne({where:{post_id:req.params.post_id,user_id:user }});
+          const like=await Like.findOne({where:{post_id:req.params.id,user_id:user }});
           return res.status(200).json({"like":like});
       } catch (error) {
           console.error('Fetch Error:', error);
@@ -49,7 +49,7 @@ export const getLikes = async (req, res) => {
       export const removeLike=async(req,res)=>{
         const user=req.user.id;
         try {
-          const like=await Like.findOne({where:{post_id:req.params.post_id,user_id:user}});
+          const like=await Like.findOne({where:{post_id:req.params.id,user_id:user}});
           if(!like){
             return res.status(404).json({error:"This post isn't liked by this user."});
           }

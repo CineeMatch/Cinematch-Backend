@@ -1,7 +1,7 @@
-import Recommendation from "../models/recommendation";
+import Recommendation from "../models/recommendation.js";
 //This section probably get updated after making ai.
 
-export const getRecommendations = async (req,res) => {
+export const getAllRecommendations = async (req,res) => {
   try {
     const recommendations = await Recommendation.findAll();
     return res.status(200).json(recommendations);

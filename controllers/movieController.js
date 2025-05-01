@@ -1,7 +1,7 @@
-import Movie from "../models/movie";
+import Movie from "../models/movie.js";
 //This section probably get updated after making ai.
 
-export const getMovies = async (res) => {
+export const getAllMovies = async (res) => {
   try {
     const movies = await Movie.findAll();
     return res.status(200).json(movies);

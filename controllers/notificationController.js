@@ -1,5 +1,5 @@
-import Notification from "../models/notification";
-export const getNotifications=async(req,res)=>{
+import Notification from "../models/notification.js";
+export const getAllNotifications=async(req,res)=>{
     try {
         const notifications=await Notification.findAll();
         return res.status(200).json(notifications);

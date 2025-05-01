@@ -1,7 +1,7 @@
 import { Op } from "sequelize";
-import Challenge from "../models/challenge";
+import Challenge from "../models/challenge.js";
 
-export const getChallenges = async (req, res) => {
+export const getAllChallenges = async (req, res) => {
   try {
     const challenges = await Challenge.findAll();
     return res.status(200).json(challenges);

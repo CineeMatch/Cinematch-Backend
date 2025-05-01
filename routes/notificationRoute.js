@@ -1,9 +1,9 @@
-import { createNotification, deleteNotification, getNotification, getNotifications, getNotificationsForUser, updateNotificationToRead } from "../controllers/notificationController.js";
+import { createNotification, deleteNotification, getNotification, getAllNotifications, getNotificationsForUser, updateNotificationToRead } from "../controllers/notificationController.js";
 import express from "express";
 
 const router = express.Router();
 
-router.route("/notifications").get( getNotifications);
+router.route("/notifications").get( getAllNotifications);
 router.route("/notification/:id").get( getNotification);
 router.route("/notifications/user").get( getNotificationsForUser);
 router.route("/notification/create").post(createNotification);

@@ -1,8 +1,8 @@
-import User from "../models/user";
+import User from "../models/user.js";
 import { Op } from "sequelize";
 
 
-export const getUsers = async (req, res) => {
+export const getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll();
     return res.status(200).json(users);
@@ -96,6 +96,9 @@ export const updateUser = async (req, res) => {
     });
 
     if (updatedUser[0] === 0) {
+      console.log("Bu çalışıyor");
+      console.log(updatedUser);
+      console.log(userId);
       return res.status(404).json({ message: "User not found or not updated." });
     }
 
@@ -107,3 +110,27 @@ export const updateUser = async (req, res) => {
     return res.status(500).json({ error: "User could not be updated." });
   }
 };
+
+export const updateActiveUser = async (req, res) => {
+  const userId = req.user.id;
+  const updateData = req.body;
+
+  try {
+    const updatedUser = await User.update(updateData, {
+      where: { id: userId }
+    });
+
+    if (updatedUser[0] === 0) {
+      console.log(updatedUser);
+      return res.status(404).json({ message: "User not found or not updated." });
+    }
+
+    const user = await User.findByPk(userId);
+    return res.status(200).json({ message: "User updated successfully.", user });
+
+  } catch (error) {
+    console.error("Update Error:", error);
+    return res.status(500).json({ error: "User could not be updated." });
+  }
+};
+

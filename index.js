@@ -20,6 +20,13 @@ import NotificationType from './models/notificationType.js';
 import Challenge from './models/challenge.js';
 import ChallangeQuestion from './models/challengeQuestion.js';
 import MovieType from './models/movieType.js';
+import challengeRoute from "./routes/challengeRoute.js";
+import likeRoute from "./routes/likeRoute.js";
+import movieRoute from "./routes/movieRoute.js";
+import notificationRoute from "./routes/notificationRoute.js";
+import recommendationRoute from "./routes/recommendationRoute.js";
+import userRoute from "./routes/userRoute.js";
+
 
 const PORT = 3000;
 const app = express();
@@ -102,6 +109,17 @@ User.hasMany(MovieType, { foreignKey: 'user_id' });
 
 // Express Ayarları
 app.use(express.json());
+app.use("/api/v1",challengeRoute );
+app.use("/api/v1",likeRoute );
+app.use("/api/v1",movieRoute );
+app.use("/api/v1",notificationRoute );
+app.use("/api/v1",recommendationRoute );
+app.use("/api/v1",userRoute );
+
+
+
+
+
 
 app.get('/', (req, res) => {
   res.send('Merhaba Node.js Backend!');
