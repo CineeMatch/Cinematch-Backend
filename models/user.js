@@ -44,6 +44,10 @@ const User = sequelize.define('User', {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  point:{
+    type:DataTypes.INTEGER,
+    allowNull:true,
+  }
 }, {
   tableName: 'users',  
   timestamps: false 

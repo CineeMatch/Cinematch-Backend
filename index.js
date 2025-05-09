@@ -26,13 +26,13 @@ import movieRoute from "./routes/movieRoute.js";
 import notificationRoute from "./routes/notificationRoute.js";
 import recommendationRoute from "./routes/recommendationRoute.js";
 import userRoute from "./routes/userRoute.js";
+import initStateRoute from "./routes/initStateRoute.js";
 
 
 const PORT = 3000;
 const app = express();
 
-Movie.belongsTo(Category, { foreignKey: 'categoryId' });
-Category.hasMany(Movie, { foreignKey: 'categoryId' });
+
 
 // MovieCategories -> Movies, Categories
 Movie.belongsToMany(Category, {
@@ -115,6 +115,7 @@ app.use("/api/v1",movieRoute );
 app.use("/api/v1",notificationRoute );
 app.use("/api/v1",recommendationRoute );
 app.use("/api/v1",userRoute );
+app.use("/api/v1",initStateRoute );
 
 
 

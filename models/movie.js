@@ -32,12 +32,17 @@ const Movie = sequelize.define('Movie', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  background_url: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   watch_link: {
     type: DataTypes.STRING,
     allowNull: true,
   },
   categoryId: {
     type: DataTypes.INTEGER,
+    allowNull: true,
     references: {
       model: 'categories',  
       key: 'id'

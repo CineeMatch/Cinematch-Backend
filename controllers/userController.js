@@ -61,7 +61,7 @@ export const createUser = async (req, res) => {
       return res.status(409).json({ error: "This User already exists." });
     }
 
-    const newUser = await User.create(req.body);
+    const newUser = await User.create({name:capitalizeWords(req.body.name),surname:capitalizeWords(req.body.surname),...req.body });
     return res.status(201).json({ message: "New user created successfully!", user: newUser });
   } catch (error) {
     console.error('Create Error:', error);
