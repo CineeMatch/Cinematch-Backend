@@ -26,6 +26,7 @@ import movieRoute from "./routes/movieRoute.js";
 import notificationRoute from "./routes/notificationRoute.js";
 import recommendationRoute from "./routes/recommendationRoute.js";
 import userRoute from "./routes/userRoute.js";
+import authRoute from "./routes/authRoute.js";
 import initStateRoute from "./routes/initStateRoute.js";
 
 
@@ -116,6 +117,7 @@ app.use("/api/v1",notificationRoute );
 app.use("/api/v1",recommendationRoute );
 app.use("/api/v1",userRoute );
 app.use("/api/v1",initStateRoute );
+app.use("/api/v1",authRoute );
 
 
 
