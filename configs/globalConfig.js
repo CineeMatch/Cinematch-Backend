@@ -17,9 +17,13 @@ const globalConfig = {
     DB_Password: process.env.DB_PASSWORD,
     DB_Name: process.env.DB_NAME,
     DB_Port: process.env.DB_PORT,
+    DB_Init_Secret: process.env.DB_INIT_SECRET,
 
     // jwt secret key
     jwtSecret: process.env.JWT_SECRET,
+
+    // Movie API
+    MOVIE_API_KEY: process.env.MOVIE_API_KEY,
 
     // SMTP
     smtp: {

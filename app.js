@@ -20,6 +20,13 @@ import conversationRoute from './routes/conversationRoute.js';
 import challengeQuestionRoute from './routes/challengeQuestionRoute.js';
 import badgeRoute from './routes/badgeRoute.js';
 import globalConfig from './configs/globalConfig.js';
+import challengeRoute from './routes/challengeRoute.js';
+import likeRoute from './routes/likeRoute.js';
+import movieRoute from './routes/movieRoute.js';
+import notificationRoute from './routes/notificationRoute.js';
+import recommendationRoute from './routes/recommendationRoute.js';
+import userRoute from './routes/userRoute.js';
+import initStateRoute from './routes/initStateRoute.js';
 
 const app = express();
 
@@ -45,6 +52,13 @@ app.use('/api/v1', commentRoute);
 app.use('/api/v1', conversationRoute);
 app.use('/api/v1', challengeQuestionRoute);
 app.use('/api/v1', badgeRoute);
+app.use("/api/v1", challengeRoute);
+app.use("/api/v1", likeRoute);
+app.use("/api/v1", movieRoute);
+app.use("/api/v1", notificationRoute);
+app.use("/api/v1", recommendationRoute);
+app.use("/api/v1", userRoute);
+app.use("/api/v1", initStateRoute);
 
 const port = globalConfig.port || 5000;
 

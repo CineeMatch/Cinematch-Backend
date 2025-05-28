@@ -3,7 +3,7 @@ import { getMovieWithPlatforms } from "../utils/fetchMovie.js";
 import axios from 'axios';
 import InitState from "../models/initState.js";
 import MovieCategory from "../models/movieCategory.js";
-import config from '../configs/config.cjs';
+import config from '../configs/associations.js';
 const { api_key } = config;
 
 

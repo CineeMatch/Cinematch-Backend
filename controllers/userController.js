@@ -1,5 +1,6 @@
 import User from "../models/user.js";
 import { Op } from "sequelize";
+import { capitalizeWords } from "../utils/wordCapitalizer.js";
 
 
 export const getAllUsers = async (req, res) => {
@@ -27,7 +28,7 @@ export const getUserByID = async (req, res) => {
   }
 };
 export const getActiveUser = async (req, res) => {
-  const id=req.user.id;
+  const id = req.user.id;
   try {
     const user = await User.findByPk(id);
     if (user) {
@@ -45,23 +46,23 @@ export const getActiveUser = async (req, res) => {
 
 export const createUser = async (req, res) => {
   try {
-    const { email, password,name,surname,nickname } = req.body;
-    if (!email || !password || !name||!surname||!nickname) {
+    const { email, password, name, surname, nickname } = req.body;
+    if (!email || !password || !name || !surname || !nickname) {
       return res.status(400).json({ error: "Required fields are missing." });
     }
     const user = await User.findOne({
-          where: {
-            [Op.or]: [
-              { email: email },
-              { nickname: nickname}
-            ]
-          }
-        });
+      where: {
+        [Op.or]: [
+          { email: email },
+          { nickname: nickname }
+        ]
+      }
+    });
     if (user) {
       return res.status(409).json({ error: "This User already exists." });
     }
 
-    const newUser = await User.create({name:capitalizeWords(req.body.name),surname:capitalizeWords(req.body.surname),...req.body });
+    const newUser = await User.create({ name: capitalizeWords(req.body.name), surname: capitalizeWords(req.body.surname), ...req.body });
     return res.status(201).json({ message: "New user created successfully!", user: newUser });
   } catch (error) {
     console.error('Create Error:', error);

@@ -1,6 +1,6 @@
 import Category from '../models/category.js';
 import axios from 'axios';
-import config from '../configs/config.cjs';
+import config from '../configs/associations.js';
 const { api_key } = config;
 
 
