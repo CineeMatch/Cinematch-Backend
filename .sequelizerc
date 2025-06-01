@@ -1,0 +1,12 @@
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const path = require('path');
+const __dirname = path.resolve();
+
+module.exports = {
+  config: path.join(__dirname, 'config', 'sequelizeConfig.js'),
+  'models-path': path.join(__dirname, 'models'),
+  'migrations-path': path.join(__dirname, 'migrations'),
+  'seeders-path': path.join(__dirname, 'seeders'),
+};
