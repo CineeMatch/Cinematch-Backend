@@ -1,5 +1,7 @@
 import Movie from "../models/movie.js";
 import movieCategory from "../models/movieCategory.js";
+import { Op } from "sequelize";
+import searchMovieByName from "../utils/searchMovie.js"; // Import the search function
 //This section probably get updated after making ai.
 
 export const getAllMovies = async (req,res) => {
@@ -74,3 +76,36 @@ export const updateMovie = async (req, res) => {
     return res.status(500).json({ error: "Movie could not be updated." });
   }
 };
+export const searchMovie = async (req, res) => {
+  const movieTitle=req.body.title;
+  try{
+    const movies = await Movie.findAll({
+      where: {
+        title: {
+          [Op.like]: `%${movieTitle}%`
+        }
+      }
+    });
+    
+    if (movies.length === 0) {
+      try {
+        const { searchedMovieList } = await searchMovieByName(movieTitle);
+        if (searchedMovieList && searchedMovieList.length > 0) {
+          return res.status(200).json(searchedMovieList);//todo:needs to create new movie
+        } else {
+          return res.status(404).json({ message: "No movies found." });
+        }
+        
+      } catch (error) {
+        console.error('Search Error:', error);
+        return res.status(500).json({ error: 'An error occurred while searching for movies in API.' });
+      }
+    }
+
+    return res.status(200).json(movies);
+  } catch (error) {
+    console.error('Search Error:', error);
+    return res.status(500).json({ error: 'An error occurred while searching for movies in db.' });
+  }
+};
+
