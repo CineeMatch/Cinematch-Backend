@@ -1,7 +1,8 @@
 import Movie from "../models/movie.js";
+import movieCategory from "../models/movieCategory.js";
 //This section probably get updated after making ai.
 
-export const getAllMovies = async (res) => {
+export const getAllMovies = async (req,res) => {
   try {
     const movies = await Movie.findAll();
     return res.status(200).json(movies);
@@ -12,7 +13,7 @@ export const getAllMovies = async (res) => {
 };
 export const getMovie=async(req,res)=>{
     try {
-        const movie=await Movie.findByPk(id);
+        const movie=await Movie.findByPk(req.params.id);
         if(!movie){
             return res.status(404).json({ error: `Movie doesn't exist.` });
         }
@@ -39,9 +40,13 @@ export const  createMovie= async (req, res) => {
 
 export const deleteMovie = async (req, res) => {
   try {
+     await movieCategory.destroy({
+      where: { movie_id: req.params.id }
+    });
     const movie=await Movie.destroy({
       where: { id: req.params.id }
     });
+   
 
     if (movie) {
       return res.status(200).json({ message: "Movie deleted successfully." });
@@ -57,7 +62,7 @@ export const deleteMovie = async (req, res) => {
 export const updateMovie = async (req, res) => {
   const movieId = req.params.id;
   try {
-    const movie = await movie.update(req.body, {
+    const movie = await Movie.update(req.body, {
       where: { id: movieId }
     });
     if (movie[0] === 0) {
