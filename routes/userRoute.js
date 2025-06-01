@@ -12,5 +12,6 @@ router.route("/user").get( authMiddleware,getActiveUser);
 router.route("/user/create").post( authMiddleware,createUser);
 router.route("/user/delete/:id").delete( authMiddleware,deleteUser);
 
+
 router.route("/user/update").put( authMiddleware,updateActiveUser);
 export default router;

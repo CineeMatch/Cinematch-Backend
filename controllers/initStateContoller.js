@@ -9,7 +9,10 @@ const { api_key } = config;
 
 export const  getAllMoviesForDb = async (req, res) => {
     const allMovies = [];
+const latinOnlyRegex = /^[A-Za-zÇĞİÖŞÜçğıöşü0-9\s.,;:'"!?()\-]+$/;
+
   
+
     try {
       for (let page = 1; page <= 10; page++) {
         const response = await axios.get('https://api.themoviedb.org/3/movie/popular', {
@@ -23,6 +26,11 @@ export const  getAllMoviesForDb = async (req, res) => {
           const existingMovie = await Movie.findOne({ where: { external_id: movie.id } });
           if(existingMovie){
             console.log(existingMovie);
+          }
+          else if(movie.title===null || movie.title===undefined || movie.title==="" || !latinOnlyRegex.test(movie.title)){
+            console.log("Movie title is not valid:", movie.title);
+            continue;
+
           }
           else{
           const result = await getMovieWithPlatforms(movie.id);

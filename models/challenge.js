@@ -8,10 +8,10 @@ const Challenge = sequelize.define('Challenge', {
   opponent_id: DataTypes.INTEGER,
   status: DataTypes.ENUM('pending', 'answered', 'completed'),
   duration: DataTypes.INTEGER,
-  created_at: DataTypes.DATE,
 }, {
   tableName: 'challenges',
-  timestamps: false,
+  timestamps: true,
+  createdAt: true,
 });
 
 export default Challenge;
