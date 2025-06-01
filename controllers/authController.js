@@ -1,8 +1,8 @@
 import User from '../models/user.js';
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Op } from 'sequelize';
 import dotenv from 'dotenv';
+import  capitalizeWords  from '../utils/wordCapitalizer.js';
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET 
@@ -20,13 +20,12 @@ const existingUser = await User.findOne({
           }
         });    if (existingUser) return res.status(400).json({ message: 'This email or nickname is already used by another user.' });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
       email,
-      password: hashedPassword,
-      name,
-      surname,
+      password,
+      name: capitalizeWords(name),
+      surname: capitalizeWords(surname),
       nickname,
     });
 
@@ -43,16 +42,16 @@ export const login = async (req, res) => {
   try {
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(404).json({ message: 'Couldn\'t find user with this email.' });
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: 'Password is wrong.' });
+    console.log("user :", user);
+   const isMatch = await user.comparePassword(password);
+   if (!isMatch) return res.status(401).json({ message: 'Password is wrong.' });
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
       JWT_SECRET,
       { expiresIn: '2h' }
     );
-
+console.log("token :", token);
     return res.json({ message: 'Loged in successfully', token });
   } catch (err) {
     console.error('Login error:', err);

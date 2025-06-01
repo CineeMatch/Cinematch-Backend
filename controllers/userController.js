@@ -92,7 +92,8 @@ export const updateUser = async (req, res) => {
 
   try {
     const updatedUser = await User.update(updateData, {
-      where: { id: userId }
+      where: { id: userId },
+      individualHooks: true 
     });
 
     if (updatedUser[0] === 0) {
@@ -117,7 +118,9 @@ export const updateActiveUser = async (req, res) => {
 
   try {
     const updatedUser = await User.update(updateData, {
-      where: { id: userId }
+      where: { id: userId },
+      individualHooks: true 
+      
     });
 
     if (updatedUser[0] === 0) {

@@ -1,4 +1,4 @@
-function capitalizeWords(str) {
+export default function capitalizeWords(str) {
     return str
       .toLowerCase()
       .split(' ')
