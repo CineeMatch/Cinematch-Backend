@@ -90,8 +90,9 @@ export const getNotification = async (req, res) => {
   
   export const updateNotificationToRead = async (req, res) => {
     try {
-      user=req.user.id;
+      const user=req.user.id;
       const notification = await Notification.findByPk(req.params.id);
+      console.log("slm:",user);
       if(notification.reciver_id!==user){
         return res.status(403).json({ message: "You are not authorized to update this notification." });
       }
