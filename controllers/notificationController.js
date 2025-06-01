@@ -44,10 +44,11 @@ export const getNotification = async (req, res) => {
   
   export const createNotification = async (req, res) => {
     const sender_id=req.user.id;
+    console.log("Sender ID:", sender_id);
 
     try {
       const { reciver_id, type_id } = req.body;
-      if (!reciver_id || !type_id ) {
+      if ((!reciver_id || !type_id )&&reciver_id!==sender_id ) {
         return res.status(400).json({ error: "Required fields are missing." });
       }
       const notification = await Notification.findOne({
@@ -89,12 +90,17 @@ export const getNotification = async (req, res) => {
   
   export const updateNotificationToRead = async (req, res) => {
     try {
-      const notification = await Notification.update(
+      user=req.user.id;
+      const notification = await Notification.findByPk(req.params.id);
+      if(notification.reciver_id!==user){
+        return res.status(403).json({ message: "You are not authorized to update this notification." });
+      }
+      const updatedNotification = await Notification.update(
         { isRead:true },
         { where: { id: req.params.id } }
       );
-  
-      if (notification[0] === 0) {
+
+      if (updatedNotification[0] === 0) {
         return res.status(404).json({ message: "Notification not found or not updated." });
       }
   

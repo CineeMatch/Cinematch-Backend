@@ -11,6 +11,7 @@ import userRoute from "./routes/userRoute.js";
 import authRoute from "./routes/authRoute.js";
 import initStateRoute from "./routes/initStateRoute.js";
 import postRoute from "./routes/postRoute.js";
+import notificationTypeRoute from './routes/notificationTypeRoute.js';
 import cors from 'cors';
 
 
@@ -31,10 +32,13 @@ app.use("/api/v1",recommendationRoute );
 app.use("/api/v1",userRoute );
 app.use("/api/v1",initStateRoute );
 app.use("/api/v1",authRoute );
+app.use("/api/v1",initStateRoute );
 
 
 
 app.use("/api/v1",postRoute);
+app.use("/api/v1",notificationTypeRoute);
+
 
 
 
