@@ -5,6 +5,8 @@ import defineAssociations from './configs/associations.js';
 import cors from 'cors';
 import http from 'http';
 import { initSocket } from './socket/index.js';
+import InitState from './models/initState.js';
+import { getAllMoviesForDb } from './controllers/initStateController.js';
 
 import movieTypeRoute from './routes/movieTypeRoute.js';
 import coMatchSuggestionRoute from './routes/coMatchSuggestionRoute.js';
@@ -27,6 +29,7 @@ import notificationRoute from './routes/notificationRoute.js';
 import recommendationRoute from './routes/recommendationRoute.js';
 import userRoute from './routes/userRoute.js';
 import initStateRoute from './routes/initStateRoute.js';
+import authRoute from './routes/authRoute.js';
 
 const app = express();
 
@@ -59,16 +62,36 @@ app.use("/api/v1", notificationRoute);
 app.use("/api/v1", recommendationRoute);
 app.use("/api/v1", userRoute);
 app.use("/api/v1", initStateRoute);
+app.use("/api/v1", authRoute);
 
 const port = globalConfig.port || 5000;
 
 sequelize.sync({ alter: true })
-  .then(() => {
-    console.log('Veritabanı senkronize edildi.');
+  .then(async () => {
+    console.log('Database synchronized.');
+
+    const [init, created] = await InitState.findOrCreate({
+      where: { id: 1 },
+      defaults: { initialized: false }
+    });
+
+    if (!init.initialized) {
+      console.log('Fetching movie data from TMDB...');
+
+      await getAllMoviesForDb(
+        { shouldUpdate: false },
+        {
+          status: () => ({ json: () => { } })
+        }
+      );
+    } else {
+      console.log('Movie data already initialized. Skipping import.');
+    }
+
     server.listen(port, () => {
-      console.log(`Sunucu çalışıyor: http://localhost:${port}`);
+      console.log(`Server is running at: http://localhost:${port}`);
     });
   })
   .catch(err => {
-    console.error('Sequelize senkronizasyon hatası:', err);
+    console.error('Error during Sequelize sync:', err);
   });

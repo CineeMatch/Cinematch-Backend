@@ -1,10 +1,15 @@
 // This controller handles challenge question-related operations
-import ChallangeQuestion from "../models/challengeQuestion.js";
+import ChallengeQuestion from "../models/challengeQuestion.js";
 
 // This function retrieves all Challange Questions from the database and sends them as a JSON response.
 export const getAllChallengeQuestions = async (req, res) => {
     try {
-        const challengeQuestions = await ChallangeQuestion.findAll();
+        const challengeQuestions = await ChallengeQuestion.findAll();
+
+        if (challengeQuestions.length === 0) {
+            return res.status(404).json({ message: "No challenge questions found" });
+        }
+
         res.status(200).json(challengeQuestions);
     } catch (error) {
         console.error("Error fetching challenge questions:", error);
@@ -14,9 +19,12 @@ export const getAllChallengeQuestions = async (req, res) => {
 
 // This function retrieves a specific challenge question by its ID from the database and sends it as a JSON response.
 export const getChallengeQuestionById = async (req, res) => {
-    const { id } = req.params;
     try {
-        const challengeQuestion = await ChallangeQuestion.findByPk(id);
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: "Challenge question ID is required" });
+        }
+        const challengeQuestion = await ChallengeQuestion.findByPk(id);
         if (!challengeQuestion) {
             return res.status(404).json({ message: "Challenge question not found" });
         }
@@ -29,10 +37,17 @@ export const getChallengeQuestionById = async (req, res) => {
 
 // This function creates a new challenge question in the database using the data provided in the request body and sends the created question as a JSON response.
 export const createChallengeQuestion = async (req, res) => {
-    const { questionText, correct_answer, selected_answer, challenge_id, created_by, directed_to } = req.body;
     try {
+        const created_by = req.user.id; // Get the user ID from the authenticated user
+        if (created_by === undefined) {
+            return res.status(401).json({ message: "Unauthorized: User ID is required" });
+        }
+        const { questionText, correct_answer, challenge_id, directed_to } = req.body;
+        if (!questionText || !correct_answer || !challenge_id || !directed_to) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
         const answered_at = new Date(); // Set the answered_at date to the current date and time
-        const newChallengeQuestion = await ChallangeQuestion.create({ questionText, correct_answer, selected_answer, challenge_id, created_by, directed_to, answered_at });
+        const newChallengeQuestion = await ChallengeQuestion.create({ questionText, correct_answer, challenge_id, created_by, directed_to, answered_at });
         res.status(201).json(newChallengeQuestion);
     } catch (error) {
         console.error("Error creating challenge question:", error);
@@ -42,19 +57,24 @@ export const createChallengeQuestion = async (req, res) => {
 
 // This function updates an existing challenge question in the database using the ID from the request parameters and the data from the request body, then sends the updated question as a JSON response.
 export const updateChallengeQuestion = async (req, res) => {
-    const { id } = req.params;
-    const { questionText, correct_answer, selected_answer, challenge_id, created_by, directed_to } = req.body;
     try {
-        const challengeQuestion = await ChallangeQuestion.findByPk(id);
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: "Challenge question ID is required" });
+        }
+        const { questionText, correct_answer, challenge_id, created_by, directed_to } = req.body;
+        if (!questionText && !correct_answer && !challenge_id && !created_by && !directed_to) {
+            return res.status(400).json({ message: "At least one field is required to update" });
+        }
+        const challengeQuestion = await ChallengeQuestion.findByPk(id);
         if (!challengeQuestion) {
             return res.status(404).json({ message: "Challenge question not found" });
         }
-        challengeQuestion.questionText = questionText;
-        challengeQuestion.correct_answer = correct_answer;
-        challengeQuestion.selected_answer = selected_answer;
-        challengeQuestion.challenge_id = challenge_id;
-        challengeQuestion.created_by = created_by;
-        challengeQuestion.directed_to = directed_to;
+        challengeQuestion.questionText = questionText || challengeQuestion.questionText;
+        challengeQuestion.correct_answer = correct_answer || challengeQuestion.correct_answer;
+        challengeQuestion.challenge_id = challenge_id || challengeQuestion.challenge_id;
+        challengeQuestion.created_by = created_by || challengeQuestion.created_by;
+        challengeQuestion.directed_to = directed_to || challengeQuestion.directed_to;
         await challengeQuestion.save();
         res.status(200).json(challengeQuestion);
     } catch (error) {
@@ -67,7 +87,7 @@ export const updateChallengeQuestion = async (req, res) => {
 export const deleteChallengeQuestion = async (req, res) => {
     const { id } = req.params;
     try {
-        const challengeQuestion = await ChallangeQuestion.findByPk(id);
+        const challengeQuestion = await ChallengeQuestion.findByPk(id);
         if (!challengeQuestion) {
             return res.status(404).json({ message: "Challenge question not found" });
         }

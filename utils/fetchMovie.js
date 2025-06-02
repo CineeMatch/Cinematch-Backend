@@ -1,9 +1,8 @@
 import Category from '../models/category.js';
 import axios from 'axios';
-import config from '../configs/associations.js';
-const { api_key } = config;
+import config from '../configs/globalConfig.js';
 
-
+const api_key = config.MOVIE_API_KEY;
 const api_url = "https://api.themoviedb.org/3/movie";
 
 export const getMovieWithPlatforms = async (movieId) => {

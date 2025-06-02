@@ -1,4 +1,5 @@
 import Post from "../models/post.js";
+import User from "../models/user.js";
 
 export const getAllPosts = async (req, res) => {
     try {
@@ -24,61 +25,75 @@ export const getPostById = async (req, res) => {
 }
 
 export const getPostByUserId = async (req, res) => {
-    const { userId } = req.params;
+    const userId = req.user.id;
     try {
-        existingUser = await User.findByPk(userId);
+        const existingUser = await User.findByPk(userId);
         if (!existingUser) {
+            console.error("User not found");
             return res.status(404).json({ message: "User not found" });
         }
         const posts = await Post.findAll({ where: { user_id: userId } });
         if (posts) {
+            console.log("Posts fetched successfully");
             res.status(200).json(posts);
         } else {
+            console.error("Posts not found for this user");
             res.status(404).json({ message: "Posts not found" });
         }
     } catch (error) {
-        res.status(500).json({ message: "Error fetching posts" });
+        res.status(500).json({ message: `Error fetching posts, ${error.message}` });
     }
 }
 
 export const createPost = async (req, res) => {
     try {
-        const { userId, content } = req.body;
-        if (!userId || !content) {
-            return res.status(400).json({ message: "userId and content are required." });
+        const userId = req.user.id;;
+        const { movie_id, contentText } = req.body;
+
+        if (!userId || !contentText) {
+            throw new Error("userId and content are required.");
         }
+
         const existingUser = await User.findByPk(userId);
         if (!existingUser) {
-            return res.status(404).json({ message: "User not found" });
+            throw new Error("User not found");
         }
-        const newPost = await Post.create({ user_id: userId, content });
+
+        const newPost = await Post.create({ user_id: userId, movie_id, contentText: contentText });
+        console.log("Post created successfully");
         res.status(201).json(newPost);
+
     } catch (error) {
-        res.status(500).json({ message: "Error creating post" });
+        console.error("Error creating post:", error);
+        res.status(500).json({ message: `Error creating post: ${error.message}` });
     }
 }
 
 export const updatePost = async (req, res) => {
     const { id } = req.params;
-    const { userId, content } = req.body;
+    const userId = req.user.id;
+    const { contentText } = req.body;
     try {
         const existingUser = await User.findByPk(userId);
         if (!existingUser) {
             return res.status(404).json({ message: "User not found" });
         }
-        if (!content) {
+        if (!contentText) {
             return res.status(400).json({ message: "content is required" });
         }
         const post = await Post.findByPk(id);
         if (post) {
-            post.content = content;
+            post.contentText = contentText;
             await post.save();
+            console.log("Post updated successfully");
             res.status(200).json(post);
         } else {
+            console.error("Post not found");
             res.status(404).json({ message: "Post not found" });
         }
     } catch (error) {
-        res.status(500).json({ message: "Error updating post" });
+        console.error("Error updating post:", error);
+        res.status(500).json({ message: `Error updating post ${error.message}` });
     }
 }
 

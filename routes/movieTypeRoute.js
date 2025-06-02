@@ -10,9 +10,9 @@ router.route("/movieTypes/wishlist").get(getWishListMovieTypes);
 router.route("/movieTypes/watched").get(getWatchedMovieTypes);
 
 router.route("/movieType/:id").get(getMovieTypeById);
-router.route("/movieType").post(createMovieType);
-router.route("/movieType/:id").put(updateMovieType);
-router.route("/movieType/:id").delete(deleteMovieType);
+router.route("/movieType/create").post(createMovieType);
+router.route("/movieType/update/:id").put(updateMovieType);
+router.route("/movieType/delete/:id").delete(deleteMovieType);
 
 //for ai
 

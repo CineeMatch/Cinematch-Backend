@@ -88,7 +88,7 @@ export default function defineAssociations() {
   User.hasMany(Challenge, { foreignKey: 'opponent_id', as: 'opponentChallenges' });
 
   // ChallangeQuestion -> Challenges, Users
-  Challenge.hasMany(ChallangeQuestion, { foreignKey: 'challange_id' });
+  Challenge.hasMany(ChallangeQuestion, { foreignKey: 'challenge_id' });
   User.hasMany(ChallangeQuestion, { foreignKey: 'created_by' });
   User.hasMany(ChallangeQuestion, { foreignKey: 'directed_to' });
 

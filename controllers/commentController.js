@@ -29,13 +29,60 @@ export const getCommentById = async (req, res) => {
 
 // This function creates a new comment in the database using the data provided in the request body and sends the created comment as a JSON response.
 export const createComment = async (req, res) => {
-    const { post_id, user_id, commentText } = req.body;
+
+    const user_id = req.user.id; // Assuming user_id is obtained from the authenticated user
+    const { post_id, commentText } = req.body;
     try {
         const created_at = new Date(); // Set the created_at date to the current date and time
         const newComment = await Comment.create({ post_id, user_id, commentText, created_at });
         res.status(201).json(newComment);
     } catch (error) {
         console.error("Error creating comment:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+// This Function retrieves all comments associated with a specific post ID from the database and sends them as a JSON response.
+export const getCommentsByPostId = async (req, res) => {
+    const { post_id } = req.params;
+    try {
+        const comments = await Comment.findAll({ where: { post_id } });
+        if (!comments || comments.length === 0) {
+            return res.status(404).json({ message: "No comments found for this post" });
+        }
+        res.status(200).json(comments);
+    } catch (error) {
+        console.error("Error fetching comments by post ID:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+// This function retrieves all comments made by the currently authenticated user from the database and sends them as a JSON response.
+export const getCommentsByCurrentUserId = async (req, res) => {
+    const userId = req.user.id; // Assuming user_id is obtained from the authenticated user
+    try {
+        const comments = await Comment.findAll({ where: { user_id: userId } });
+        if (!comments || comments.length === 0) {
+            return res.status(404).json({ message: "No comments found for this user" });
+        }
+        res.status(200).json(comments);
+    } catch (error) {
+        console.error("Error fetching comments by user ID:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+// This function retrieves all comments made by a specific user ID from the database and sends them as a JSON response.
+export const getCommentsByUserId = async (req, res) => {
+    const { user_id } = req.params; // Assuming user_id is passed as a parameter
+    try {
+        const comments = await Comment.findAll({ where: { user_id } });
+        if (!comments || comments.length === 0) {
+            return res.status(404).json({ message: "No comments found for this user" });
+        }
+        res.status(200).json(comments);
+    } catch (error) {
+        console.error("Error fetching comments by user ID:", error);
         res.status(500).json({ message: "Internal server error" });
     }
 }

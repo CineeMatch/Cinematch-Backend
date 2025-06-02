@@ -3,7 +3,7 @@ import MovieType from '../models/movieType.js';
 import MovieCategory from '../models/movieCategory.js';
 import Category from '../models/category.js';
 import { Op } from 'sequelize';
-import User from '../models/User.js';
+import User from '../models/user.js';
 import natural from 'natural';
 
 

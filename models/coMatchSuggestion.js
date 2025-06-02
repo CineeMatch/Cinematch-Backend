@@ -11,11 +11,11 @@ const CoMatchSuggestion = sequelize.define('CoMatchSuggestion', {
   shared_movies_count: DataTypes.INTEGER,
 
   created_at: DataTypes.DATE,
-}, 
+},
 
-{
-  tableName: 'comatchsuggestions',
-  timestamps: false,
-});
+  {
+    tableName: 'comatchsuggestions',
+    timestamps: true,
+  });
 
 export default CoMatchSuggestion;

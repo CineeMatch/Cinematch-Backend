@@ -4,8 +4,8 @@ import { Router } from "express";
 const router = Router();
 
 router.route("/commentlikes").get(getAllCommentLikes);
-router.route("/commentlikes/:id").get(getCommentLikeById);
-router.route("/commentlikes").post(createCommentLike);
-router.route("/commentlikes/:id").delete(deleteCommentLike);
+router.route("/commentlike/:id").get(getCommentLikeById);
+router.route("/commentlike/create").post(createCommentLike);
+router.route("/commentlike/delete/:id").delete(deleteCommentLike);
 
 export default router;

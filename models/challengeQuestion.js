@@ -1,18 +1,17 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../configs/database.js';
 
-const ChallangeQuestion = sequelize.define('ChallangeQuestion', {
+const ChallengeQuestion = sequelize.define('ChallengeQuestion', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  challange_id: DataTypes.INTEGER,
+  challenge_id: DataTypes.INTEGER,
   created_by: DataTypes.INTEGER,
   directed_to: DataTypes.INTEGER,
   questionText: DataTypes.TEXT,
-  correct_answer: DataTypes.STRING,
-  selected_answer: DataTypes.STRING,
+  correct_answer: DataTypes.BOOLEAN,
   answered_at: DataTypes.DATE,
 }, {
-  tableName: 'challangequestion',
+  tableName: 'challengequestion',
   timestamps: false,
 });
 
-export default ChallangeQuestion;
+export default ChallengeQuestion;

@@ -1,6 +1,5 @@
 import User from "../models/user.js";
 import { Op } from "sequelize";
-import { capitalizeWords } from "../utils/wordCapitalizer.js";
 
 
 export const getAllUsers = async (req, res) => {
@@ -93,7 +92,8 @@ export const updateUser = async (req, res) => {
 
   try {
     const updatedUser = await User.update(updateData, {
-      where: { id: userId }
+      where: { id: userId },
+      individualHooks: true
     });
 
     if (updatedUser[0] === 0) {
@@ -118,7 +118,9 @@ export const updateActiveUser = async (req, res) => {
 
   try {
     const updatedUser = await User.update(updateData, {
-      where: { id: userId }
+      where: { id: userId },
+      individualHooks: true
+
     });
 
     if (updatedUser[0] === 0) {
@@ -134,4 +136,3 @@ export const updateActiveUser = async (req, res) => {
     return res.status(500).json({ error: "User could not be updated." });
   }
 };
-

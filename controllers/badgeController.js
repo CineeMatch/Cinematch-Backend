@@ -60,8 +60,6 @@ export const updateBadge = async (req, res) => {
         badge.description = description || badge.description; // Update only if new value is provided
         badge.updated_at = new Date(); // Set the updated_at date to the current date and time
 
-
-        // await badge.update(updatedBadge);
         await badge.save();
         res.status(200).json(badge);
     } catch (error) {

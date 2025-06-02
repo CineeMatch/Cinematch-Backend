@@ -29,7 +29,7 @@ export const createCommentLike = async (req, res) => {
         if (!userId || !commentId) {
             return res.status(400).json({ message: "userId and commentId are required." });
         }
-        
+
         const existingUser = await User.findByPk(userId);
         if (!existingUser) {
             return res.status(404).json({ message: "User not found" });
