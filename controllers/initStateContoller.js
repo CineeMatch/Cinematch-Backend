@@ -1,5 +1,5 @@
 import Movie from "../models/movie.js";
-import { getMovieWithPlatforms } from "../utils/fetchMovie.js";
+import { getMovieWithPlatforms } from "../utils/movieApi.js";
 import axios from 'axios';
 import InitState from "../models/initState.js";
 import MovieCategory from "../models/movieCategory.js";
@@ -9,7 +9,7 @@ const { api_key } = config;
 
 export const  getAllMoviesForDb = async (req, res) => {
     const allMovies = [];
-const latinOnlyRegex = /^[A-Za-zÇĞİÖŞÜçğıöşü0-9\s.,;:'"!?()\-]+$/;
+  const latinOnlyRegex = /^[A-Za-zÇĞİÖŞÜçğıöşü0-9\s.,;:'"!?&*()\-]+$/;
 
   
 

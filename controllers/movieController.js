@@ -1,8 +1,11 @@
 import Movie from "../models/movie.js";
 import movieCategory from "../models/movieCategory.js";
 import { Op } from "sequelize";
-import searchMovieByName from "../utils/searchMovie.js"; // Import the search function
-//This section probably get updated after making ai.
+import MovieCategory from "../models/movieCategory.js";
+import { getMovieWithPlatforms,searchMovieByName } from "../utils/movieApi.js";
+import axios from 'axios';
+import config from '../configs/config.cjs';
+const { api_key } = config;
 
 export const getAllMovies = async (req,res) => {
   try {
@@ -80,7 +83,7 @@ export const updateMovie = async (req, res) => {
 
 export const searchMovie = async (req, res) => {
   const movieTitle = req.body.title;
-  const latinOnlyRegex = /^[A-Za-zÇĞİÖŞÜçğıöşü0-9\s.,;:'"!?()\-]+$/;
+const latinOnlyRegex = /^[A-Za-zÇĞİÖŞÜçğıöşüÑñÁáÉéÍíÓóÚúÜüâêîôûãõß0-9\s.,;:'"!?()\-*&]+$/;
 
   if (!movieTitle || movieTitle.trim() === '') {
     return res.status(400).json({ message: "Film adı boş olamaz." });
@@ -141,7 +144,7 @@ export const searchMovie = async (req, res) => {
             const createdMovie = await Movie.create(movie.movieData);
             return createdMovie;
           } catch (err) {
-            console.error(`Film eklenirken hata: ${movie.movieData?.title}`, err.message);
+            console.error(`Error while adding movie: ${movie.movieData?.title}`, err.message);
             return null;
           }
         })
@@ -150,11 +153,73 @@ export const searchMovie = async (req, res) => {
       const successfullyAdded = newMoviesAdded.filter(Boolean);
       return res.status(200).json(successfullyAdded);
     } catch (error) {
-      console.error('TMDb arama hatası:', error);
-      return res.status(500).json({ error: 'TMDb üzerinden film aranırken hata oluştu.' });
+      console.error('TMDb search error:', error);
+      return res.status(500).json({ error: 'Error occurred while searching for movies on TMDb.' });
     }
   } catch (error) {
-    console.error('Veritabanı arama hatası:', error);
-    return res.status(500).json({ error: 'Veritabanında film aranırken hata oluştu.' });
+    console.error('Error while searching db:', error);
+    return res.status(500).json({ error: 'Error occurred while searching for movies in the database.' });
+  }
+};
+
+export const take10Movies = async (req, res) => {//can break into piecess
+  const allMovies = [];
+  const latinOnlyRegex = /^[A-Za-zÇĞİÖŞÜçğıöşü0-9\s.,;:'"!?&*()\-]+$/;
+
+  try {
+    const response = await axios.get("https://api.themoviedb.org/3/movie/popular", {
+      headers: { Authorization: `Bearer ${api_key}` },
+      params: { language: "tr-TR", page: 1 }
+    });
+
+    const movies = response?.data?.results || [];
+
+    if (!movies.length) {
+      return res.status(404).json({ message: "No movies found from TMDb." });
+    }
+
+    for (const movie of movies) {
+      const title = movie.title;
+
+      if (typeof title !== "string" || !title.trim() || !latinOnlyRegex.test(title)) {
+        console.log("Movie title is not valid:", title);
+        continue;
+      }
+
+      const existingMovie = await Movie.findOne({ where: { external_id: movie.id } });
+      if (existingMovie) {
+        allMovies.length < 10 ? allMovies.push(existingMovie) : null;
+        continue;
+      }
+
+      const result = await getMovieWithPlatforms(movie.id);
+      if (!result) {
+        console.log("Cannot get details:", movie.id);
+        continue;
+      }
+
+      const savedMovie = await Movie.create(result.movieData);
+
+      for (const catId of result.movieCategories) {
+        await MovieCategory.findOrCreate({
+          where: {
+            movie_id: savedMovie.id,
+            category_id: catId
+          }
+        });
+      }
+
+      allMovies.length <10 ? allMovies.push(savedMovie) : null;
+    }
+    
+
+    res.status(200).json({
+      message: `${allMovies.length} movie listed.`,
+      movies: allMovies
+    });
+
+  } catch (error) {
+    console.error("Error fetching movies:", error.message, error);
+    res.status(500).json({ error: "Movies cannot be fetched." });
   }
 };
