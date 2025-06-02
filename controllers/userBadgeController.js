@@ -5,6 +5,11 @@ import UserBadge from "../models/userBadge.js";
 export const getAllUserBadges = async (req, res) => {
     try {
         const userBadges = await UserBadge.findAll();
+
+        if (!userBadges || userBadges.length === 0) {
+            return res.status(404).json({ message: "No user badges found" });
+        }
+
         res.status(200).json(userBadges);
     } catch (error) {
         console.error("Error fetching user badges:", error);
@@ -14,12 +19,19 @@ export const getAllUserBadges = async (req, res) => {
 
 // This function retrieves a specific user badge by its ID from the database and sends it as a JSON response.
 export const getUserBadgeById = async (req, res) => {
-    const { id } = req.params;
     try {
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).json({ message: "User badge ID is required" });
+        }
+
         const userBadge = await UserBadge.findByPk(id);
+
         if (!userBadge) {
             return res.status(404).json({ message: "User badge not found" });
         }
+
         res.status(200).json(userBadge);
     } catch (error) {
         console.error("Error fetching user badge:", error);
@@ -29,8 +41,18 @@ export const getUserBadgeById = async (req, res) => {
 
 // This function creates a new user badge in the database using the data provided in the request body and sends the created user badge as a JSON response.
 export const createUserBadge = async (req, res) => {
-    const { user_id, badge_id } = req.body;
     try {
+        const { user_id, badge_id } = req.body;
+
+        if (!user_id || !badge_id) {
+            return res.status(400).json({ message: "User ID and badge ID are required" });
+        }
+        const existingUserBadge = await UserBadge.findOne({ where: { user_id, badge_id } });
+
+        if (existingUserBadge) {
+            return res.status(400).json({ message: "User badge already exists" });
+        }
+
         const earned_at = new Date(); // Set the earned_at date to the current date and time
         const newUserBadge = await UserBadge.create({ user_id, badge_id, earned_at });
         res.status(201).json(newUserBadge);
@@ -42,13 +64,23 @@ export const createUserBadge = async (req, res) => {
 
 // This function updates an existing user badge in the database using the ID provided in the request parameters and the data provided in the request body, and sends the updated user badge as a JSON response.
 export const updateUserBadge = async (req, res) => {
-    const { id } = req.params;
-    const { user_id, badge_id } = req.body;
     try {
+        const { id } = req.params;
+        const { user_id, badge_id } = req.body;
+
+        if (!id) {
+            return res.status(400).json({ message: "User badge ID is required" });
+        }
+
         const userBadge = await UserBadge.findByPk(id);
+
         if (!userBadge) {
             return res.status(404).json({ message: "User badge not found" });
         }
+
+        userBadge.user_id = user_id || userBadge.user_id; // Update only if new value is provided
+        userBadge.badge_id = badge_id || userBadge.badge_id; // Update only if new value is provided
+
         await userBadge.update({ user_id, badge_id });
         res.status(200).json(userBadge);
     } catch (error) {
@@ -59,11 +91,18 @@ export const updateUserBadge = async (req, res) => {
 
 // This function deletes a user badge from the database using the ID provided in the request parameters and sends a success message as a JSON response.
 export const deleteUserBadge = async (req, res) => {
-    const { id } = req.params;
     try {
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).json({ message: "User badge ID is required" });
+        }
+
         const userBadge = await UserBadge.findByPk(id);
+
         if (!userBadge) {
             return res.status(404).json({ message: "User badge not found" });
+
         }
         await userBadge.destroy();
         res.status(200).json({ message: "User badge deleted successfully" });
