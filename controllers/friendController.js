@@ -54,7 +54,8 @@ export const getFriendById = async (req, res) => {
 
 export const createFriend = async (req, res) => {
     try {
-        const { userId, friendId, status } = req.body;
+        userId = req.user.id;
+        const { friendId, status } = req.body;
         if (!userId || !friendId) {
             return res.status(400).json({ message: "userId and friendId are required." });
         }

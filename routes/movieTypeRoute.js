@@ -14,8 +14,6 @@ router.route("/movieType/create").post(createMovieType);
 router.route("/movieType/update/:id").put(updateMovieType);
 router.route("/movieType/delete/:id").delete(deleteMovieType);
 
-//for ai
-
 router.route("user/:userId/movieTypes").get(getUserMovies);
 
 
