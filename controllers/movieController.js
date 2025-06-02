@@ -76,9 +76,17 @@ export const updateMovie = async (req, res) => {
     return res.status(500).json({ error: "Movie could not be updated." });
   }
 };
+
+
 export const searchMovie = async (req, res) => {
-  const movieTitle=req.body.title;
-  try{
+  const movieTitle = req.body.title;
+  const latinOnlyRegex = /^[A-Za-zÇĞİÖŞÜçğıöşü0-9\s.,;:'"!?()\-]+$/;
+
+  if (!movieTitle || movieTitle.trim() === '') {
+    return res.status(400).json({ message: "Film adı boş olamaz." });
+  }
+
+  try {
     const movies = await Movie.findAll({
       where: {
         title: {
@@ -86,26 +94,67 @@ export const searchMovie = async (req, res) => {
         }
       }
     });
-    
-    if (movies.length === 0) {
-      try {
-        const { searchedMovieList } = await searchMovieByName(movieTitle);
-        if (searchedMovieList && searchedMovieList.length > 0) {
-          return res.status(200).json(searchedMovieList);//todo:needs to create new movie
-        } else {
-          return res.status(404).json({ message: "No movies found." });
-        }
-        
-      } catch (error) {
-        console.error('Search Error:', error);
-        return res.status(500).json({ error: 'An error occurred while searching for movies in API.' });
-      }
+
+    if (movies.length > 0) {
+      return res.status(200).json(movies);
     }
 
-    return res.status(200).json(movies);
+    try {
+      const result = await searchMovieByName(movieTitle);
+      const { searchedMovieList } = result || {};
+
+      if (!searchedMovieList || searchedMovieList.length === 0) {
+        return res.status(404).json({ message: "TMDb'de de film bulunamadı." });
+      }
+
+      const today = new Date();
+      const oneYearLater = new Date();
+      oneYearLater.setFullYear(today.getFullYear() + 1);
+
+      const filteredList = searchedMovieList.filter((movie) => {
+        const data = movie.movieData;
+        const title = data?.title;
+        const releaseDateStr = data?.release_year;
+        const releaseDate = releaseDateStr ? new Date(releaseDateStr) : null;
+
+        const passed =
+          title &&
+          latinOnlyRegex.test(title) &&
+          releaseDate &&
+          releaseDate.getFullYear() >= 1900 &&
+          releaseDate <= oneYearLater;
+
+        if (!passed) {
+          console.log("Film filtreyi geçemedi:", title, releaseDateStr);
+        }
+
+        return passed;
+      });
+
+      if (filteredList.length === 0) {
+        return res.status(404).json({ message: "Hiçbir film filtreyi geçemedi." });
+      }
+
+      const newMoviesAdded = await Promise.all(
+        filteredList.map(async (movie) => {
+          try {
+            const createdMovie = await Movie.create(movie.movieData);
+            return createdMovie;
+          } catch (err) {
+            console.error(`Film eklenirken hata: ${movie.movieData?.title}`, err.message);
+            return null;
+          }
+        })
+      );
+
+      const successfullyAdded = newMoviesAdded.filter(Boolean);
+      return res.status(200).json(successfullyAdded);
+    } catch (error) {
+      console.error('TMDb arama hatası:', error);
+      return res.status(500).json({ error: 'TMDb üzerinden film aranırken hata oluştu.' });
+    }
   } catch (error) {
-    console.error('Search Error:', error);
-    return res.status(500).json({ error: 'An error occurred while searching for movies in db.' });
+    console.error('Veritabanı arama hatası:', error);
+    return res.status(500).json({ error: 'Veritabanında film aranırken hata oluştu.' });
   }
 };
-
