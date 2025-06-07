@@ -42,7 +42,6 @@ export const login = async (req, res) => {
   try {
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(404).json({ message: 'Couldn\'t find user with this email.' });
-    console.log("user :", user);
    const isMatch = await user.comparePassword(password);
    if (!isMatch) return res.status(401).json({ message: 'Password is wrong.' });
 
@@ -51,7 +50,7 @@ export const login = async (req, res) => {
       JWT_SECRET,
       { expiresIn: '2h' }
     );
-console.log("token :", token);
+  console.log("token :", token);
     return res.json({ message: 'Loged in successfully', token });
   } catch (err) {
     console.error('Login error:', err);
