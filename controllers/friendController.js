@@ -1,12 +1,18 @@
 import Friend from "../models/friend.js";
 import User from "../models/user.js";
+import { Op } from "sequelize";
 
 export const getAllFriends = async (req, res) => {
     try {
-        const friends = await Friend.findAll();
+        const friends = await Friend.findAll({
+            include: [
+                { model: User, as: 'initiator' },
+                { model: User, as: 'receiver' }
+            ]
+        });
         res.status(200).json(friends);
     } catch (error) {
-        res.status(500).json({ message: "Error fetching friends" });
+        res.status(500).json({ message: `Error fetching friends ${error.message}` });
     }
 }
 
@@ -15,33 +21,50 @@ export const getUserFriends = async (req, res) => {
         const userId = req.user.id;
 
         if (!userId) {
-            return res.status(400).json({ error: "User ID is required." });
+            return res.status(400).json({ error: 'User ID is required.' });
         }
+
         const existingUser = await User.findByPk(userId);
         if (!existingUser) {
-            return res.status(404).json({ error: "User not found." });
+            return res.status(404).json({ error: 'User not found.' });
         }
+
         const friends = await Friend.findAll({
             where: {
                 user_id: userId,
-                // veya friend_id: userId // isteğe göre ikisini de kontrol edebilirsin
-            }
+                status: 'accepted'
+            },
+            include: [
+                {
+                    model: User,
+                    as: 'receiver',
+                }
+            ]
         });
 
-        return res.status(200).json(friends);
+        const result = friends.map(friend => friend.receiver); // direkt User objesi
+
+        return res.status(200).json(result);
     } catch (error) {
-        console.error("Get User Friends Error:", error);
-        return res.status(500).json({ error: `Failed to fetch user's friends, ${error.message}.` });
+        console.error('Get User Friends Error:', error);
+        return res.status(500).json({
+            error: `Failed to fetch user's friends: ${error.message}`
+        });
     }
 };
 
 
-//gereksiz olabilir. Friend tablosundaki id deki kayıtı getirmek için kullanılabilir.
-// Ancak, kullanıcıların arkadaşlarını almak için yukarıdaki fonksiyon daha mantıklı.
 export const getFriendById = async (req, res) => {
     const { id } = req.params;
     try {
-        const friend = await Friend.findByPk(id);
+        const friend = await Friend.findByPk(id, {
+            include: [
+                {
+                    model: User,
+                    as: 'initiator',
+                }
+            ]
+        });
         if (friend) {
             res.status(200).json(friend);
         } else {

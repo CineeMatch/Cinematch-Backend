@@ -15,7 +15,7 @@ import CommentLike from '../models/commentLike.js';
 import Notification from '../models/notification.js';
 import NotificationType from '../models/notificationType.js';
 import Challenge from '../models/challenge.js';
-import ChallangeQuestion from '../models/challengeQuestion.js';
+import ChallengeQuestion from '../models/challengeQuestion.js';
 import MovieType from '../models/movieType.js';
 
 
@@ -88,11 +88,16 @@ export default function defineAssociations() {
   User.hasMany(Challenge, { foreignKey: 'opponent_id', as: 'opponentChallenges' });
 
   // ChallangeQuestion -> Challenges, Users
-  Challenge.hasMany(ChallangeQuestion, { foreignKey: 'challenge_id' });
-  User.hasMany(ChallangeQuestion, { foreignKey: 'created_by' });
-  User.hasMany(ChallangeQuestion, { foreignKey: 'directed_to' });
+  Challenge.hasMany(ChallengeQuestion, { foreignKey: 'challenge_id' });
+  User.hasMany(ChallengeQuestion, { foreignKey: 'created_by' });
+  User.hasMany(ChallengeQuestion, { foreignKey: 'directed_to' });
 
   // MovieTypes.movie_id > MovieCategories.id (mantıksal olarak movie_id -> Movie.id olması gerek)
   Movie.hasMany(MovieType, { foreignKey: 'movie_id' });
   User.hasMany(MovieType, { foreignKey: 'user_id' });
+
+  // Friend.js
+  Friend.belongsTo(User, { foreignKey: 'user_id', as: 'initiator' });
+  Friend.belongsTo(User, { foreignKey: 'friend_id', as: 'receiver' });
+
 }

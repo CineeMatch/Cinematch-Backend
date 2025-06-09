@@ -15,5 +15,27 @@ import CommentLike from './commentLike.js';
 import Notification from './notification.js';
 import NotificationType from './notificationType.js';
 import Challenge from './challenge.js';
-import ChallangeQuestion from './challengeQuestion.js';
+import ChallengeQuestion from './challengeQuestion.js';
 import MovieType from './movieType.js';
+
+export {
+    User,
+    Movie,
+    Category,
+    MovieCategory,
+    UserBadge,
+    Badge,
+    Friend,
+    CoMatchSuggestion,
+    Conversation,
+    Recommendation,
+    Post,
+    Comment,
+    Like,
+    CommentLike,
+    Notification,
+    NotificationType,
+    Challenge,
+    ChallengeQuestion,
+    MovieType
+};
