@@ -17,7 +17,7 @@ import cors from 'cors';
 
 
 
-const PORT = 3000;
+const PORT = 5000;
 const app = express();
 
 
@@ -38,14 +38,6 @@ app.use("/api/v1",initStateRoute );
 
 app.use("/api/v1",postRoute);
 app.use("/api/v1",notificationTypeRoute);
-
-
-
-
-
-
-
-
 app.get('/', (req, res) => {
   res.send('Merhaba Node.js Backend!');
 });

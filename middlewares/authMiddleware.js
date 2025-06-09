@@ -9,7 +9,6 @@ const authMiddleware = async (req, res, next) => {
     console.log("token :", token);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ✅ Sequelize için doğru sorgu
     const user = await User.findOne({
       where: { id: decoded.id }
     });

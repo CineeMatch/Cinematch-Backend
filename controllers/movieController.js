@@ -5,6 +5,7 @@ import MovieCategory from "../models/movieCategory.js";
 import { getMovieWithPlatforms,searchMovieByName } from "../utils/movieApi.js";
 import axios from 'axios';
 import config from '../configs/config.cjs';
+import sequelize from "../configs/database.js";
 const { api_key } = config;
 
 export const getAllMovies = async (req,res) => {
@@ -162,7 +163,7 @@ const latinOnlyRegex = /^[A-Za-zÇĞİÖŞÜçğıöşüÑñÁáÉéÍíÓóÚú
   }
 };
 
-export const take10Movies = async (req, res) => {//can break into piecess
+export const getTop10Movies = async (req, res) => {
   const allMovies = [];
   const latinOnlyRegex = /^[A-Za-zÇĞİÖŞÜçğıöşü0-9\s.,;:'"!?&*()\-]+$/;
 
@@ -223,3 +224,25 @@ export const take10Movies = async (req, res) => {//can break into piecess
     res.status(500).json({ error: "Movies cannot be fetched." });
   }
 };
+export const getRandomMovie = async (req, res) => {
+  try {
+    const movies = await Movie.findAll({
+      where: {
+        background_url: {
+          [Op.ne]: null
+        }
+      },
+      order: sequelize.literal('RAND()'),
+      limit: req.body.limit
+    });
+
+    if (movies.length === 0) {
+      return res.status(404).json({ message: "No movies found." });
+    }
+
+    res.status(200).json(movies);
+  } catch (error) {
+    console.error('Error fetching random movies:', error);
+    res.status(500).json({ error: 'Random movies cannot be fetched.' });
+  }
+}
