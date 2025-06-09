@@ -1,4 +1,5 @@
 import CommentLike from '../models/commentLike.js';
+import Comment from '../models/comment.js';
 import User from '../models/user.js';
 
 export const getAllCommentLikes = async (req, res) => {
@@ -27,8 +28,8 @@ export const getCommentLikeById = async (req, res) => {
 export const createCommentLike = async (req, res) => {
     try {
         const userId = req.user.id;
-        const {commentId } = req.body;
-        if (!userId || !commentId) {
+        const {comment_id } = req.body;
+        if (!userId || !comment_id) {
             return res.status(400).json({ message: "userId and commentId are required." });
         }
         
@@ -36,24 +37,24 @@ export const createCommentLike = async (req, res) => {
         if (!existingUser) {
             return res.status(404).json({ message: "User not found" });
         }
-        const existingComment = await Comment.findByPk(commentId);
+        const existingComment = await Comment.findByPk(comment_id);
         if (!existingComment) {
-            return res.status(404).json({ message: "Comment not found" });
+            return res.status(404).json({ message: "Comment Like not found" });
         }
         const existingLike = await CommentLike.findOne({
             where: {
                 user_id: userId,
-                comment_id: commentId
+                comment_id: comment_id
             }
         });
 
         if (existingLike) {
             return res.status(400).json({ message: "You have already liked this comment." });
         }
-        const newCommentLike = await CommentLike.create({ user_id: userId, comment_id: commentId });
+        const newCommentLike = await CommentLike.create({ user_id: userId, comment_id: comment_id });
         res.status(201).json(newCommentLike);
     } catch (error) {
-        res.status(500).json({ message: "Error creating comment like" });
+        res.status(500).json({ message: `Error creating comment like ${error.message} ` });
     }
 }
 
