@@ -95,4 +95,9 @@ export default function defineAssociations() {
   // MovieTypes.movie_id > MovieCategories.id (mantıksal olarak movie_id -> Movie.id olması gerek)
   Movie.hasMany(MovieType, { foreignKey: 'movie_id' });
   User.hasMany(MovieType, { foreignKey: 'user_id' });
+
+  // Friend.js
+  Friend.belongsTo(User, { foreignKey: 'user_id', as: 'initiator' });
+  Friend.belongsTo(User, { foreignKey: 'friend_id', as: 'receiver' });
+
 }

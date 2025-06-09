@@ -1,4 +1,5 @@
 import CommentLike from '../models/commentLike.js';
+import User from '../models/user.js';
 
 export const getAllCommentLikes = async (req, res) => {
     try {
@@ -25,7 +26,8 @@ export const getCommentLikeById = async (req, res) => {
 
 export const createCommentLike = async (req, res) => {
     try {
-        const { userId, commentId } = req.body;
+        const userId = req.user.id;
+        const {commentId } = req.body;
         if (!userId || !commentId) {
             return res.status(400).json({ message: "userId and commentId are required." });
         }
