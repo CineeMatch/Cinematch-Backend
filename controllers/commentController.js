@@ -30,7 +30,7 @@ export const getCommentById = async (req, res) => {
         }
         res.status(200).json(comment);
     } catch (error) {
-        console.error("Error fetching comment:", error);
+        console.error("Error fetching comment:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 }
@@ -50,7 +50,7 @@ export const createComment = async (req, res) => {
         const newComment = await Comment.create({ post_id, user_id, commentText, created_at });
         res.status(201).json(newComment);
     } catch (error) {
-        console.error("Error creating comment:", error);
+        console.error("Error creating comment:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 }
@@ -65,7 +65,7 @@ export const getCommentsByPostId = async (req, res) => {
         }
         res.status(200).json(comments);
     } catch (error) {
-        console.error("Error fetching comments by post ID:", error);
+        console.error("Error fetching comments by post ID:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 }
@@ -83,7 +83,7 @@ export const getCommentsByCurrentUserId = async (req, res) => {
         }
         res.status(200).json(comments);
     } catch (error) {
-        console.error("Error fetching comments by user ID:", error);
+        console.error("Error fetching comments by user ID:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 }
@@ -101,7 +101,7 @@ export const getCommentsByUserId = async (req, res) => {
         }
         res.status(200).json(comments);
     } catch (error) {
-        console.error("Error fetching comments by user ID:", error);
+        console.error("Error fetching comments by user ID:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 }
@@ -128,7 +128,7 @@ export const updateComment = async (req, res) => {
         await comment.save();
         res.status(200).json(comment);
     } catch (error) {
-        console.error("Error updating comment:", error);
+        console.error("Error updating comment:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 }
@@ -147,7 +147,7 @@ export const deleteComment = async (req, res) => {
         await comment.destroy();
         res.status(200).json({ message: "Comment deleted successfully" });
     } catch (error) {
-        console.error("Error deleting comment:", error);
+        console.error("Error deleting comment:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 }
