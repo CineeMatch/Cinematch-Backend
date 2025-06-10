@@ -66,7 +66,7 @@ app.use("/api/v1", authRoute);
 
 const port = globalConfig.port || 5000;
 
-sequelize.sync({ alter: true })
+sequelize.sync({ alter: false, force: false })
   .then(async () => {
     console.log('Database synchronized.');
 
