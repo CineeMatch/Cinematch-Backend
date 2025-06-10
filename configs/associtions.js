@@ -17,23 +17,56 @@ import NotificationType from '../models/notificationType.js';
 import Challenge from '../models/challenge.js';
 import ChallangeQuestion from '../models/challengeQuestion.js';
 import MovieType from '../models/movieType.js';
+import Platform from '../models/platform.js';
+import MoviePlatform from '../models/moviePlatform.js';
 
 
 export default function defineAssociations() {
-    Movie.belongsTo(Category, { foreignKey: 'categoryId' });
-Category.hasMany(Movie, { foreignKey: 'categoryId' });
+// MovieCategory -> Movies, Categories
+Movie.belongsTo(Category, {
+  as: 'mainCategory',
+  foreignKey: 'categoryId'
+});
+Category.hasMany(Movie, {
+  as: 'movies',
+  foreignKey: 'categoryId'
+});
 
-// MovieCategories -> Movies, Categories
 Movie.belongsToMany(Category, {
   through: MovieCategory,
+  as: 'categories',
   foreignKey: 'movie_id',
   otherKey: 'category_id',
 });
 Category.belongsToMany(Movie, {
   through: MovieCategory,
+  as: 'moviesWithRelation',
   foreignKey: 'category_id',
   otherKey: 'movie_id',
 });
+// Movie -> Platforms (many-to-many through MoviePlatform)
+Movie.belongsTo(Platform, {
+  as: 'mainPlatform',
+  foreignKey: 'platformId'
+});
+Platform.hasMany(Movie, {
+  as: 'movies',
+  foreignKey: 'platformId'
+});
+
+Movie.belongsToMany(Platform, {
+  through: MoviePlatform,
+  as: 'platforms',
+  foreignKey: 'movie_id',
+  otherKey: 'platform_id',
+});
+Platform.belongsToMany(Movie, {
+  through: MoviePlatform,
+  as: 'moviesWithRelation',
+  foreignKey: 'platform_id',
+  otherKey: 'movie_id',
+});
+
 
 // userBadges -> Users, Badges
 User.hasMany(UserBadge, { foreignKey: 'user_id' });

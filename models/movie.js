@@ -40,14 +40,7 @@ const Movie = sequelize.define('Movie', {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  categoryId: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    references: {
-      model: 'categories',  
-      key: 'id'
-    }
-  },
+ 
   external_id: {
     type: DataTypes.STRING,
     allowNull: true,

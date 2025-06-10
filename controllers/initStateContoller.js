@@ -3,6 +3,7 @@ import { getMovieWithPlatforms } from "../utils/movieApi.js";
 import axios from 'axios';
 import InitState from "../models/initState.js";
 import MovieCategory from "../models/movieCategory.js";
+import MoviePlatform from "../models/moviePlatform.js";
 import config from '../configs/config.cjs';
 const { api_key } = config;
 
@@ -37,21 +38,28 @@ export const  getAllMoviesForDb = async (req, res) => {
           if (!result) continue;
   
           const savedMovie = await Movie.create(result.movieData);
-  
-          for (const catId of result.movieCategories) {
+
+          for (const catID of result.movieCategories) {
             await MovieCategory.findOrCreate({
               where: {
                 movie_id: savedMovie.id,
-                category_id: catId
+                category_id: catID
+              }
+            });}
+            for(const platformId of result.moviePlatforms){
+            await MoviePlatform.findOrCreate({
+              where: {
+                movie_id: savedMovie.id,
+                platform_id: platformId
               }
             });
-          }
-  
-          allMovies.push(savedMovie);}
+            }
+
+          allMovies.push(savedMovie);
         }
-  
+
         console.log(`${page} got executed.`);
-      }
+      }}
   
       await InitState.update(
         { initialized: true },        
@@ -64,7 +72,7 @@ export const  getAllMoviesForDb = async (req, res) => {
           : `DB initialized. ${allMovies.length} movie added.`
       });
   
-    } catch (error) {
+    }catch (error) {
       console.error(' Cannot save movies:', error.message,error);
       res.status(500).json({ error: 'Something went wrong.' });
     }

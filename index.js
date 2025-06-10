@@ -1,7 +1,5 @@
 import express from 'express';
 import sequelize from './configs/database.js';
-
-
 import challengeRoute from "./routes/challengeRoute.js";
 import likeRoute from "./routes/likeRoute.js";
 import movieRoute from "./routes/movieRoute.js";
@@ -13,13 +11,13 @@ import initStateRoute from "./routes/initStateRoute.js";
 import postRoute from "./routes/postRoute.js";
 import notificationTypeRoute from './routes/notificationTypeRoute.js';
 import cors from 'cors';
-
-
+import defineAssociations from './configs/associtions.js';
 
 
 const PORT = 5000;
 const app = express();
 
+defineAssociations();
 
 
 app.use(cors());

@@ -1,6 +1,7 @@
 import Category from '../models/category.js';
 import axios from 'axios';
 import config from '../configs/config.cjs';
+import Platform from '../models/platform.js';
 const { api_key } = config;
 
 
@@ -25,6 +26,7 @@ export const getMovieWithPlatforms = async (movieId) => {
     ]);
 
     const data = movieDetails.data;
+    console.log(data);
 
     const ageRating = ratingDetails.data.results
       .find(m => m.iso_3166_1 === "TR")
@@ -35,6 +37,15 @@ export const getMovieWithPlatforms = async (movieId) => {
 
     const providers = data['watch/providers']?.results?.TR?.flatrate || [];
     const platforms = providers.map(p => p.provider_name);
+    const platformIds = [];
+    for (const platformName of platforms) {
+      let platform = await Platform.findOne({ where: { name: platformName } });
+      if (!platform) {
+        platform = await Platform.create({ name: platformName });
+        console.log(`New platform added: ${platformName}`);
+      }
+      platformIds.push(platform.id);
+    }
     console.log(platforms);
 
     const genres = data.genres.map(g => g.name);
@@ -58,12 +69,12 @@ export const getMovieWithPlatforms = async (movieId) => {
         age_rating: ageRating,
         poster_url: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : null,
         background_url: data.backdrop_path ? `https://image.tmdb.org/t/p/w500${data.backdrop_path}` : null,
-        watch_link: data['watch/providers']?.results?.TR?.link || null,
         director,
         actor: cast,
         external_id: data.id
       },
-      movieCategories: genreIds
+      movieCategories: genreIds,
+      moviePlatforms: platformIds
     };
 
   } catch (error) {

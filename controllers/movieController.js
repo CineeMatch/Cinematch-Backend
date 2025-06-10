@@ -1,16 +1,27 @@
 import Movie from "../models/movie.js";
-import movieCategory from "../models/movieCategory.js";
+import Platform from "../models/platform.js";
 import { Op } from "sequelize";
 import MovieCategory from "../models/movieCategory.js";
 import { getMovieWithPlatforms,searchMovieByName } from "../utils/movieApi.js";
 import axios from 'axios';
 import config from '../configs/config.cjs';
 import sequelize from "../configs/database.js";
+import Category from "../models/category.js";
 const { api_key } = config;
 
 export const getAllMovies = async (req,res) => {
   try {
-    const movies = await Movie.findAll();
+    const movies = await Movie.findAll({ include: [{
+    model: Category,
+    as: 'categories',
+    attributes: ['id','name'],
+    through: { attributes: [] },
+  },{
+    model: Platform,
+    as: 'platforms',
+    attributes: ['id','name'],
+    through: { attributes: [] },
+  }] });
     return res.status(200).json(movies);
   } catch (error) {
     console.error('Fetch Error:', error);
@@ -19,7 +30,17 @@ export const getAllMovies = async (req,res) => {
 };
 export const getMovie=async(req,res)=>{
     try {
-        const movie=await Movie.findByPk(req.params.id);
+        const movie=await Movie.findByPk(req.params.id,{ include: [{
+    model: Category,
+    as: 'categories',
+    attributes: ['id','name'],
+    through: { attributes: [] },
+  },{
+    model: Platform,
+    as: 'platforms',
+    attributes: ['id','name'],
+    through: { attributes: [] },
+  }] });
         if(!movie){
             return res.status(404).json({ error: `Movie doesn't exist.` });
         }
@@ -32,11 +53,11 @@ export const getMovie=async(req,res)=>{
 
 export const  createMovie= async (req, res) => {
  try {
-  const movie=await movie.findOne({where:{external_id:req.body.external_id}});
+  const movie=await Movie.findOne({where:{external_id:req.body.external_id}});
   if(movie){
     res.status(409).json("This movie already exist.");
   }
-  const newMovie=await movie.create(req.body);
+  const newMovie=await Movie.create(req.body);
   res.status(201).json({message:"Movie created successfully.",movie:newMovie});
  } catch (error) {
   console.error('Fetch Error:', error);
@@ -46,7 +67,7 @@ export const  createMovie= async (req, res) => {
 
 export const deleteMovie = async (req, res) => {
   try {
-     await movieCategory.destroy({
+     await MovieCategory.destroy({
       where: { movie_id: req.params.id }
     });
     const movie=await Movie.destroy({
@@ -96,7 +117,18 @@ const latinOnlyRegex = /^[A-Za-zÇĞİÖŞÜçğıöşüÑñÁáÉéÍíÓóÚú
         title: {
           [Op.like]: `%${movieTitle}%`
         }
-      }
+      },
+      include: [{
+        model: Category,
+        as: 'categories',
+        attributes: ['id','name'],
+        through: { attributes: [] },
+      },{
+        model: Platform,
+        as: 'platforms',
+        attributes: ['id','name'],
+        through: { attributes: [] },
+      }]
     });
 
     if (movies.length > 0) {
@@ -187,7 +219,18 @@ export const getTop10Movies = async (req, res) => {
         continue;
       }
 
-      const existingMovie = await Movie.findOne({ where: { external_id: movie.id } });
+      const existingMovie = await Movie.findOne({ where: { external_id: movie.id }, include: [{
+    model: Category,
+    as: 'categories',
+    attributes: ['id','name'],
+    through: { attributes: [] },
+  },{
+    model: Platform,
+    as: 'platforms',
+    attributes: ['id','name'],
+    through: { attributes: [] },
+  }] });
+  console.log("Existing movie:", existingMovie );
       if (existingMovie) {
         allMovies.length < 10 ? allMovies.push(existingMovie) : null;
         continue;
@@ -212,8 +255,6 @@ export const getTop10Movies = async (req, res) => {
 
       allMovies.length <10 ? allMovies.push(savedMovie) : null;
     }
-    
-
     res.status(200).json({
       message: `${allMovies.length} movie listed.`,
       movies: allMovies
@@ -233,7 +274,18 @@ export const getRandomMovie = async (req, res) => {
         }
       },
       order: sequelize.literal('RAND()'),
-      limit: req.body.limit
+      limit: req.body.limit,
+      include: [{
+        model: Category,
+        as: 'categories',
+        attributes: ['id','name'],
+        through: { attributes: [] },
+      },{
+        model: Platform,
+        as: 'platforms',
+        attributes: ['id','name'],
+        through: { attributes: [] },
+      }]
     });
 
     if (movies.length === 0) {
