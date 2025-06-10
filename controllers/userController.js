@@ -1,7 +1,6 @@
 import User from "../models/user.js";
 import { Op } from "sequelize";
 
-
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll();
@@ -11,7 +10,6 @@ export const getAllUsers = async (req, res) => {
     return res.status(500).json({ error: 'User cannot be found.' });
   }
 };
-
 
 export const getUserByID = async (req, res) => {
   try {
@@ -26,6 +24,7 @@ export const getUserByID = async (req, res) => {
     return res.status(500).json({ error: 'User cannot be found.' });
   }
 };
+
 export const getActiveUser = async (req, res) => {
   const id = req.user.id;
   try {
@@ -40,8 +39,6 @@ export const getActiveUser = async (req, res) => {
     return res.status(500).json({ error: 'User cannot be found.' });
   }
 };
-
-
 
 export const createUser = async (req, res) => {
   try {

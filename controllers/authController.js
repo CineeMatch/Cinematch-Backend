@@ -9,6 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET
 
 export const register = async (req, res) => {
   const { email, password, name, surname, nickname } = req.body;
+  console.log("req.body :", req.body);
 
   try {
     const existingUser = await User.findOne({
@@ -30,9 +31,9 @@ export const register = async (req, res) => {
     });
 
     return res.status(201).json({ message: 'User created succesfully.', user: { id: newUser.id, email: newUser.email } });
-  } catch (err) {
-    console.error('Register error:', err);
-    res.status(500).json({ message: `Something went wrong, ${err.message}` });
+  } catch (error) {
+    console.error('Register error:', error.message);
+    res.status(500).json({ message: `Something went wrong, ${error.message}` });
   }
 };
 
@@ -53,8 +54,8 @@ export const login = async (req, res) => {
     );
     console.log("token :", token);
     return res.json({ message: 'Loged in successfully', token });
-  } catch (err) {
-    console.error('Login error:', err);
+  } catch (error) {
+    console.error('Login error:', error.message);
     res.status(500).json({ message: 'Something went wrong' });
   }
 };
