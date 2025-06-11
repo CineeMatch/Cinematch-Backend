@@ -120,3 +120,67 @@ export const deleteMovieType = async (req, res) => {
   }
 }
 
+export const isOnProfileMovieType = async (req, res) => {
+  const userId = req.user.id;
+  const { movie_ids } = req.body;
+
+  if (!Array.isArray(movie_ids) || movie_ids.length === 0) {
+    return res.status(400).json({ message: "No movie IDs provided." });
+  }
+
+  try {
+
+      const previouslyOnProfile = await MovieType.findAll({
+      where: { user_id: userId, is_on_profile: true }
+    });
+
+     for (const movieType of previouslyOnProfile) {
+      if (!movieType.favorite && !movieType.wishlist && !movieType.watched) {
+        await movieType.destroy();
+        console.log(`Deleted movieType with movie_id: ${movieType.movie_id}`);
+      } else {
+        movieType.is_on_profile = false;
+        await movieType.save();
+      }
+    }
+
+    const updatedMovies = [];
+
+    // 2. Yeni seçilen max 10 filmi true yap
+    const limitedMovieIds = movie_ids.slice(0, 10);
+
+    for (const movie_id of limitedMovieIds) {
+      let movieType = await MovieType.findOne({
+        where: { user_id: userId, movie_id }
+      });
+
+      if (movieType) {
+        movieType.is_on_profile = true;
+        await movieType.save();
+      } else {
+        movieType = await MovieType.create({
+          user_id: userId,
+          movie_id,
+          is_on_profile: true
+        });
+      }
+
+      updatedMovies.push(movieType);
+    }
+
+    return res.status(200).json({
+      isOnProfile: true,
+      message: `${updatedMovies.length} movies added to profile`,
+      movieTypes: updatedMovies
+    });
+
+  } catch (error) {
+    console.error("Error updating profile movies:", error);
+    return res.status(500).json({
+      error: `Failed to update profile movies - ${error.message}`
+    });
+  }
+};
+
+
+

@@ -7,6 +7,5 @@ export function normalizeMovieFlags({ favoriteMovies, watchedMovies, wishlistMov
     favoriteMovies: favorite,
     watchedMovies: watched,
     wishlistMovies: wishlist,
-    is_on_profile: favorite,
   };
 }
