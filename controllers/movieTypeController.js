@@ -16,7 +16,9 @@ export const getAllMovieTypes = async (req, res) => {
 export const getFavoriteMovieTypes = async (req, res) => {
   try {
     const movieTypes = await MovieType.findAll({ where: { favoriteMovies: true } });
-    res.status(200).json(movieTypes);
+    const count = movieTypes.length;
+    res.status(200).json({count, data: movieTypes});
+    
   } catch (error) {
     res.status(500).json({ message: "Error fetching favorite movie types" });
   }
@@ -25,7 +27,9 @@ export const getFavoriteMovieTypes = async (req, res) => {
 export const getWishListMovieTypes = async (req, res) => {
   try {
     const movieTypes = await MovieType.findAll({ where: { wishlistMovies: true } });
-    res.status(200).json(movieTypes);
+    const count = movieTypes.length;
+    res.status(200).json({count, data: movieTypes});
+
   } catch (error) {
     res.status(500).json({ message: "Error fetching wish list movie types" });
   }
@@ -34,7 +38,9 @@ export const getWishListMovieTypes = async (req, res) => {
 export const getWatchedMovieTypes = async (req, res) => {
   try {
     const movieTypes = await MovieType.findAll({ where: { watchedMovies: true } });
-    res.status(200).json(movieTypes);
+    const count = movieTypes.length;
+    res.status(200).json({count, data: movieTypes});
+    
   } catch (error) {
     res.status(500).json({ message: "Error fetching watched movie types" });
   }
