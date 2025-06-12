@@ -1,4 +1,8 @@
 import MovieType from "../models/movieType.js";
+import User from "../models/user.js";
+import Movie from "../models/movie.js";
+import { normalizeMovieFlags } from "../utils/movieTypeRules.js";
+
 
 export const getAllMovieTypes = async (req, res) => {
   try {
@@ -11,8 +15,10 @@ export const getAllMovieTypes = async (req, res) => {
 
 export const getFavoriteMovieTypes = async (req, res) => {
   try {
-    const movieTypes = await MovieType.findAll({ where: { is_favorite: true } });
-    res.status(200).json(movieTypes);
+    const movieTypes = await MovieType.findAll({ where: { favoriteMovies: true } });
+    const count = movieTypes.length;
+    res.status(200).json({ count, data: movieTypes });
+
   } catch (error) {
     res.status(500).json({ message: "Error fetching favorite movie types" });
   }
@@ -20,8 +26,10 @@ export const getFavoriteMovieTypes = async (req, res) => {
 
 export const getWishListMovieTypes = async (req, res) => {
   try {
-    const movieTypes = await MovieType.findAll({ where: { is_wish_list: true } });
-    res.status(200).json(movieTypes);
+    const movieTypes = await MovieType.findAll({ where: { wishlistMovies: true } });
+    const count = movieTypes.length;
+    res.status(200).json({ count, data: movieTypes });
+
   } catch (error) {
     res.status(500).json({ message: "Error fetching wish list movie types" });
   }
@@ -29,8 +37,10 @@ export const getWishListMovieTypes = async (req, res) => {
 
 export const getWatchedMovieTypes = async (req, res) => {
   try {
-    const movieTypes = await MovieType.findAll({ where: { is_watched: true } });
-    res.status(200).json(movieTypes);
+    const movieTypes = await MovieType.findAll({ where: { watchedMovies: true } });
+    const count = movieTypes.length;
+    res.status(200).json({ count, data: movieTypes });
+
   } catch (error) {
     res.status(500).json({ message: "Error fetching watched movie types" });
   }
@@ -51,11 +61,20 @@ export const getMovieTypeById = async (req, res) => {
 }
 
 
-export const createMovieType = async (req, res) => {
+export const createandUpdateMovieType = async (req, res) => {
   try {
-    const { user_id, movie_id, listType } = req.body;
+    const userId = req.user.id;
+    const { movie_id, favoriteMovies, watchedMovies, wishlistMovies } = req.body;
 
-    const existingUser = await User.findByPk(user_id);
+    if (!movie_id) {
+      return res.status(400).json({ error: "movie_id is required." });
+    }
+
+    if (![favoriteMovies, watchedMovies, wishlistMovies].some(Boolean)) {
+      return res.status(400).json({ error: "At least one list type must be true." });
+    }
+
+    const existingUser = await User.findByPk(userId);
     if (!existingUser) {
       return res.status(404).json({ error: "User not found." });
     }
@@ -65,76 +84,33 @@ export const createMovieType = async (req, res) => {
       return res.status(404).json({ error: "Movie not found." });
     }
 
-    if (!["favorite", "watched", "wishlist"].includes(listType)) {
-      return res.status(400).json({ error: "Invalid list type." });
-    }
+    const normalized = normalizeMovieFlags({ favoriteMovies, watchedMovies, wishlistMovies });
 
-    // Aynı kullanıcı ve film kombinasyonu zaten var mı kontrol et
-    const existingRecord = await MovieType.findOne({ where: { user_id, movie_id } });
+    const existingRecord = await MovieType.findOne({
+      where: { user_id: userId, movie_id }
+    });
+
     if (existingRecord) {
-      return res.status(400).json({ error: "Movie type already exists for this user and movie." });
+      Object.assign(existingRecord, normalized);
+      await existingRecord.save();
+      return res.status(200).json(existingRecord);
     }
 
-    const newRecord = {
-      user_id,
+    const movieType = await MovieType.create({
+      user_id: userId,
       movie_id,
-      favoriteMovies: listType === "favorite",
-      watchedMovies: listType === "watched",
-      wishlistMovies: listType === "wishlist",
+      ...normalized,
       added_at: new Date(),
-      is_on_profile: true,
-    };
-
-    const movieType = await MovieType.create(newRecord);
+    });
 
     return res.status(201).json(movieType);
+
   } catch (error) {
     console.error("Create MovieType Error:", error);
-    res.status(500).json({ error: "Failed to create movie type." });
+    return res.status(500).json({ error: `Failed to create movie type, ${error.message}` });
   }
 };
 
-export const updateMovieType = async (req, res) => {
-  try {
-    const { user_id, movie_id, listType } = req.body;
-
-    const existingUser = await User.findByPk(user_id);
-    if (!existingUser) {
-      return res.status(404).json({ error: "User not found." });
-    }
-
-    const existingMovie = await Movie.findByPk(movie_id);
-    if (!existingMovie) {
-      return res.status(404).json({ error: "Movie not found." });
-    }
-
-
-    if (!["favorite", "watched", "wishlist"].includes(listType)) {
-      return res.status(400).json({ error: "Invalid list type." });
-    }
-
-    const movieType = await MovieType.findOne({ where: { user_id, movie_id } });
-
-    if (!movieType) {
-      return res.status(404).json({ error: "Movie type not found for this user and movie." });
-    }
-
-    if (listType === "favorite") {
-      movieType.favoriteMovies = true;
-    } else if (listType === "watched") {
-      movieType.watchedMovies = true;
-    } else if (listType === "wishlist") {
-      movieType.wishlistMovies = true;
-    }
-
-    await movieType.save();
-
-    return res.status(200).json(movieType);
-  } catch (error) {
-    console.error("Update MovieType Error:", error);
-    res.status(500).json({ error: "Failed to update movie type." });
-  }
-};
 
 export const deleteMovieType = async (req, res) => {
   const { id } = req.params;
@@ -144,8 +120,72 @@ export const deleteMovieType = async (req, res) => {
       return res.status(404).json({ message: "Movie type not found" });
     }
     await existingMovieType.destroy();
-    res.status(204).send();
+    return res.status(200).json({ message: "Movie type deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting movie type" });
   }
 }
+
+export const isOnProfileMovieType = async (req, res) => {
+  const userId = req.user.id;
+  const { movie_ids } = req.body;
+
+  if (!Array.isArray(movie_ids) || movie_ids.length === 0) {
+    return res.status(400).json({ message: "No movie IDs provided." });
+  }
+
+  try {
+
+    const previouslyOnProfile = await MovieType.findAll({
+      where: { user_id: userId, is_on_profile: true }
+    });
+
+    for (const movieType of previouslyOnProfile) {
+      if (!movieType.favorite && !movieType.wishlist && !movieType.watched) {
+        await movieType.destroy();
+        console.log(`Deleted movieType with movie_id: ${movieType.movie_id}`);
+      } else {
+        movieType.is_on_profile = false;
+        await movieType.save();
+      }
+    }
+
+    const updatedMovies = [];
+
+    // 2. Yeni seçilen max 10 filmi true yap
+    const limitedMovieIds = movie_ids.slice(0, 10);
+
+    for (const movie_id of limitedMovieIds) {
+      let movieType = await MovieType.findOne({
+        where: { user_id: userId, movie_id }
+      });
+
+      if (movieType) {
+        movieType.is_on_profile = true;
+        await movieType.save();
+      } else {
+        movieType = await MovieType.create({
+          user_id: userId,
+          movie_id,
+          is_on_profile: true
+        });
+      }
+
+      updatedMovies.push(movieType);
+    }
+
+    return res.status(200).json({
+      isOnProfile: true,
+      message: `${updatedMovies.length} movies added to profile`,
+      movieTypes: updatedMovies
+    });
+
+  } catch (error) {
+    console.error("Error updating profile movies:", error);
+    return res.status(500).json({
+      error: `Failed to update profile movies - ${error.message}`
+    });
+  }
+};
+
+

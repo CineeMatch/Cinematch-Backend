@@ -115,26 +115,95 @@ export const createFriend = async (req, res) => {
     }
 }
 
-export const deleteFriend = async (req, res) => {
-    console.log("Delete Friend Request Body:", req.body);
-    const { friendId } = req.body;
-    const userId = req.user.id;
+export const createFriendForNickname = async (req, res) => {
     try {
-        const existingFriend = await Friend.findAll({
+        const userId = req.user.id;
+        const { nickname } = req.body;
+
+        console.log("User ID from token:", userId);
+        console.log("Friend nickname from request body:", nickname);
+
+        if (!userId || !nickname) {
+            return res.status(400).json({ message: "User ID and nickname are required." });
+        }
+
+        const existingUser = await User.findByPk(userId);
+        if (!existingUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const friendUser = await User.findOne({
+            where: { nickname }
+        });
+
+        if (!friendUser) {
+            return res.status(404).json({ message: "Friend not found with this nickname." });
+        }
+
+        const friendId = friendUser.id;
+
+        if (userId === friendId) {
+            return res.status(400).json({ message: "You cannot add yourself as a friend." });
+        }
+
+        const existingFriendship = await Friend.findOne({
             where: {
-                friend_id: friendId,
-                user_id: userId
+                user_id: userId,
+                friend_id: friendId
             }
         });
-        if (!existingFriend) {
+
+        if (existingFriendship) {
+            return res.status(400).json({ message: "Friendship already exists." });
+        }
+
+        const newFriend = await Friend.create({
+            user_id: userId,
+            friend_id: friendId,
+            status: "pending"
+        });
+
+        return res.status(201).json({
+            message: "Friend request sent successfully.",
+            friend: newFriend
+        });
+
+    } catch (error) {
+        console.error("Create Friend Error:", error);
+        res.status(500).json({ message: `Error creating friend: ${error.message}` });
+    }
+};
+
+export const deleteFriend = async (req, res) => {
+    const { friendId } = req.params;
+    const userId = req.user.id;
+
+    try {
+        // İki yönlü arkadaşlığı kontrol et
+        const friendships = await Friend.findAll({
+            where: {
+                [Op.or]: [
+                    { user_id: userId, friend_id: friendId },
+                    { user_id: friendId, friend_id: userId }
+                ]
+            }
+        });
+
+        if (!friendships || friendships.length === 0) {
             return res.status(404).json({ message: "Friend not found" });
         }
-        await existingFriend.destroy();
-        res.status(200).json({ message: "Friend deleted successfully" });
+
+        // Tüm bulunan kayıtları sil
+        for (const friendship of friendships) {
+            await friendship.destroy();
+        }
+
+        return res.status(200).json({ message: "Friend deleted successfully" });
+
     } catch (error) {
-        res.status(500).json({ message: "Error deleting friend" });
+        return res.status(500).json({ message: `Error deleting friend: ${error.message}` });
     }
-}
+};
 
 export const acceptFriendRequest = async (req, res) => {
     try {
