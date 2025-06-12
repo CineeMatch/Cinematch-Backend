@@ -1,8 +1,9 @@
-import { createUser, deleteUser, getActiveUser, getUserByID, getAllUsers, updateUser, updateActiveUser } from "../controllers/userController.js";
+import { createUser, deleteUser, getActiveUser, getUserByID, getAllUsers, updateUser, updateActiveUser,updateUserAvatar } from "../controllers/userController.js";
 import express from "express";
 import  authMiddleware  from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
+router.route("/user/update/profile").put(authMiddleware,updateUserAvatar)
 
 router.route("/user/update/:id").put( authMiddleware,updateUser);
 

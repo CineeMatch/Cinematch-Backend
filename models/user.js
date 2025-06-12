@@ -29,9 +29,13 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  profile_image: {
+  profile_image_url: {
     type: DataTypes.STRING,
     allowNull: true,
+  },
+  profile_image_public_id:{
+     type: DataTypes.STRING,
+     allowNull: true,
   },
   level: {
     type: DataTypes.INTEGER,
