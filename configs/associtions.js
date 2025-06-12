@@ -117,6 +117,8 @@ NotificationType.hasMany(Notification, { foreignKey: 'type_id' });
 
 // Challenges -> Users, Movies
 Movie.hasMany(Challenge, { foreignKey: 'movie_id' });
+Challenge.belongsTo(Movie, { foreignKey: 'movie_id', as: 'movie' });
+
 User.hasMany(Challenge, { foreignKey: 'creator_id', as: 'createdChallenges' });
 User.hasMany(Challenge, { foreignKey: 'opponent_id', as: 'opponentChallenges' });
 

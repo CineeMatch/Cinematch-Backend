@@ -9,7 +9,7 @@ const Notification = sequelize.define('Notification', {
   isRead: DataTypes.BOOLEAN,
 }, {
   tableName: 'notification',
-  timestamps: false,
+  timestamps: true,
 });
 
 export default Notification;
