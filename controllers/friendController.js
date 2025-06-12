@@ -116,7 +116,8 @@ export const createFriend = async (req, res) => {
 }
 
 export const deleteFriend = async (req, res) => {
-    const { friendId } = req.params;
+    console.log("Delete Friend Request Body:", req.body);
+    const { friendId } = req.body;
     const userId = req.user.id;
     try {
         const existingFriend = await Friend.findAll({
