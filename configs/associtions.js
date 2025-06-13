@@ -121,6 +121,8 @@ Challenge.belongsTo(Movie, { foreignKey: 'movie_id', as: 'movie' });
 
 User.hasMany(Challenge, { foreignKey: 'creator_id', as: 'createdChallenges' });
 User.hasMany(Challenge, { foreignKey: 'opponent_id', as: 'opponentChallenges' });
+Challenge.belongsTo(User, { foreignKey: 'creator_id', as: 'creator' });
+Challenge.belongsTo(User, { foreignKey: 'opponent_id', as: 'opponent' });
 
 // ChallangeQuestion -> Challenges, Users
 Challenge.hasMany(ChallangeQuestion, { foreignKey: 'challange_id' });

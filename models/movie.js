@@ -44,6 +44,7 @@ const Movie = sequelize.define('Movie', {
   external_id: {
     type: DataTypes.STRING,
     allowNull: true,
+    unique:true
   },
   director: {
     type: DataTypes.STRING,

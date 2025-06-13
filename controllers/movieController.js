@@ -7,6 +7,8 @@ import axios from 'axios';
 import config from '../configs/config.cjs';
 import sequelize from "../configs/database.js";
 import Category from "../models/category.js";
+import MoviePlatform from "../models/moviePlatform.js";
+import {recommendMoviesForUser} from "../utils/recommendationAlgorithm.js"
 const { api_key } = config;
 
 export const getAllMovies = async (req,res) => {
@@ -55,10 +57,10 @@ export const  createMovie= async (req, res) => {
  try {
   const movie=await Movie.findOne({where:{external_id:req.body.external_id}});
   if(movie){
-    res.status(409).json("This movie already exist.");
+   return res.status(409).json("This movie already exist.");
   }
   const newMovie=await Movie.create(req.body);
-  res.status(201).json({message:"Movie created successfully.",movie:newMovie});
+  return res.status(201).json({message:"Movie created successfully.",movie:newMovie});
  } catch (error) {
   console.error('Fetch Error:', error);
     return res.status(500).json({ error: 'Movie cannot be created.' });
@@ -102,98 +104,120 @@ export const updateMovie = async (req, res) => {
   }
 };
 
-
 export const searchMovie = async (req, res) => {
   const movieTitle = req.body.title;
-const latinOnlyRegex = /^[A-Za-zÇĞİÖŞÜçğıöşüÑñÁáÉéÍíÓóÚúÜüâêîôûãõß0-9\s.,;:'"!?()\-*&]+$/;
+
+  const latinOnlyRegex = /^[A-Za-zÇĞİÖŞÜçğıöşüÑñÁáÉéÍíÓóÚúÜüâêîôûãõß0-9\s.,;:'"!?()\-*&]+$/;
 
   if (!movieTitle || movieTitle.trim() === '') {
     return res.status(400).json({ message: "Film adı boş olamaz." });
   }
 
   try {
-    const movies = await Movie.findAll({
+    // 1️⃣ Veritabanında ara
+    const dbMovies = await Movie.findAll({
       where: {
-        title: {
-          [Op.like]: `%${movieTitle}%`
-        }
+        title: { [Op.like]: `%${movieTitle}%` }
       },
-      include: [{
-        model: Category,
-        as: 'categories',
-        attributes: ['id','name'],
-        through: { attributes: [] },
-      },{
-        model: Platform,
-        as: 'platforms',
-        attributes: ['id','name'],
-        through: { attributes: [] },
-      }]
+      include: [
+        {
+          model: Category,
+          as: 'categories',
+          attributes: ['id', 'name'],
+          through: { attributes: [] }
+        },
+        {
+          model: Platform,
+          as: 'platforms',
+          attributes: ['id', 'name'],
+          through: { attributes: [] }
+        }
+      ]
     });
 
-    if (movies.length > 0) {
-      return res.status(200).json(movies);
+    if (dbMovies.length >= 20) {
+      return res.status(200).json(dbMovies.slice(0, 20));
     }
 
-    try {
-      const result = await searchMovieByName(movieTitle);
-      const { searchedMovieList } = result || {};
+    // 2️⃣ TMDb'den ara
+    const result = await searchMovieByName(movieTitle);
+    const { searchedMovieList } = result || {};
 
-      if (!searchedMovieList || searchedMovieList.length === 0) {
-        return res.status(404).json({ message: "TMDb'de de film bulunamadı." });
-      }
+    if (!searchedMovieList || searchedMovieList.length === 0) {
+      return res.status(404).json({ message: "TMDb'de de film bulunamadı." });
+    }
 
-      const today = new Date();
-      const oneYearLater = new Date();
-      oneYearLater.setFullYear(today.getFullYear() + 1);
+    // 3️⃣ Filtreleme
+    const today = new Date();
+    const oneYearLater = new Date();
+    oneYearLater.setFullYear(today.getFullYear() + 1);
 
-      const filteredList = searchedMovieList.filter((movie) => {
-        const data = movie.movieData;
-        const title = data?.title;
-        const releaseDateStr = data?.release_year;
-        const releaseDate = releaseDateStr ? new Date(releaseDateStr) : null;
+    const filteredNewMovies = [];
 
-        const passed =
-          title &&
-          latinOnlyRegex.test(title) &&
-          releaseDate &&
-          releaseDate.getFullYear() >= 1900 &&
-          releaseDate <= oneYearLater;
+    for (const movie of searchedMovieList) {
+      if (filteredNewMovies.length + dbMovies.length >= 20) break;
 
-        if (!passed) {
-          console.log("Film filtreyi geçemedi:", title, releaseDateStr);
+      const data = movie.movieData;
+      const title = data?.title;
+      const releaseDateStr = data?.release_year;
+      const releaseDate = releaseDateStr ? new Date(releaseDateStr) : null;
+      const poster_url = data?.poster_url;
+
+      const valid =
+        title &&
+        poster_url &&
+        latinOnlyRegex.test(title) &&
+        releaseDate &&
+        releaseDate.getFullYear() >= 1900 &&
+        releaseDate <= oneYearLater &&
+        data?.external_id;
+
+      if (!valid) continue;
+
+      try {
+        // 🧠 FIND OR CREATE!
+        const [createdMovie, isNew] = await Movie.findOrCreate({
+          where: { external_id: data.external_id },
+          defaults: data
+        });
+
+
+        if (isNew) {
+         for (const catID of movie.movieCategories) {
+            await MovieCategory.findOrCreate({
+              where: {
+                movie_id: createdMovie.id,
+                category_id: catID
+              }
+            });}
+            for(const platformId of movie.moviePlatforms){
+            await MoviePlatform.findOrCreate({
+              where: {
+                movie_id: createdMovie.id,
+                platform_id: platformId
+              }
+            });
+            }
+          filteredNewMovies.push(createdMovie);
         }
-
-        return passed;
-      });
-
-      if (filteredList.length === 0) {
-        return res.status(404).json({ message: "Hiçbir film filtreyi geçemedi." });
+      } catch (err) {
+        console.error(`Hata oluştu: ${data?.title}`, err.message);
       }
-
-      const newMoviesAdded = await Promise.all(
-        filteredList.map(async (movie) => {
-          try {
-            const createdMovie = await Movie.create(movie.movieData);
-            return createdMovie;
-          } catch (err) {
-            console.error(`Error while adding movie: ${movie.movieData?.title}`, err.message);
-            return null;
-          }
-        })
-      );
-
-      const successfullyAdded = newMoviesAdded.filter(Boolean);
-      return res.status(200).json(successfullyAdded);
-    } catch (error) {
-      console.error('TMDb search error:', error);
-      return res.status(500).json({ error: 'Error occurred while searching for movies on TMDb.' });
     }
-  } catch (error) {
-    console.error('Error while searching db:', error);
-    return res.status(500).json({ error: 'Error occurred while searching for movies in the database.' });
+
+    const finalList = [...dbMovies, ...filteredNewMovies].slice(0, 20);
+
+    if (finalList.length === 0) {
+      return res.status(404).json({ message: "Hiçbir film kriterleri geçemedi." });
+    }
+
+    return res.status(200).json(finalList);
+  } catch (err) {
+    console.error('searchMovie error:', err);
+    return res.status(500).json({ error: 'Sunucu hatası.' });
   }
 };
+
 
 export const getTop10Movies = async (req, res) => {
   const allMovies = [];
@@ -296,5 +320,20 @@ export const getRandomMovie = async (req, res) => {
   } catch (error) {
     console.error('Error fetching random movies:', error);
     res.status(500).json({ error: 'Random movies cannot be fetched.' });
+  }
+}
+export const getMovieRecommendations=async (req,res)=>{
+  try {
+    const userId=req.user.id;
+    const recommendatedMovies= await recommendMoviesForUser(userId);
+    res.status(200).json({message:"recommendated movies created",movies:recommendatedMovies});
+  } catch (error) {
+ console.error("Recommendation Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to generate recommendations",
+      error: error.message,
+    });
+    
   }
 }

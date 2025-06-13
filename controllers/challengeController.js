@@ -3,6 +3,7 @@ import Challenge from "../models/challenge.js";
 import Movie from "../models/movie.js";
 import NotificationType from "../models/notificationType.js";
 import Notification from "../models/notification.js";
+import User from "../models/user.js";
 
 export const getAllChallenges = async (req, res) => {
   try {
@@ -16,24 +17,32 @@ export const getAllChallenges = async (req, res) => {
 
 export const getChallengeByID = async (req, res) => {
   try {
-    const challenge = await Challenge.findByPk(req.params.id,{include: [{ model: Movie, as: 'movie' }] });
-    if (challenge) {
-       const challengeWithMovie = 
-       {
-        challenge_Id: challenge.id,
-        movie_title: challenge.movie.title,
-        movie_poster: challenge.movie.poster_url,
-        movie_id: challenge.movie.id,
-        creator_id: challenge.creator_id,
-        opponent_id: challenge.opponent_id,
-        status: challenge.status,
-        duration: challenge.duration,
-      };
-   
-      return res.status(200).json({challenge: challengeWithMovie});
-    } else {
+    const challenge = await Challenge.findByPk(req.params.id, {
+      include: [
+        { model: Movie, as: 'movie' },
+        { model: User, as: 'creator', attributes: ['id', 'nickname'] },
+        { model: User, as: 'opponent', attributes: ['id', 'nickname'] },
+      ],
+    });
+
+    if (!challenge) {
       return res.status(404).json({ error: `Challenge doesn't exist.` });
     }
+
+    const challengeWithMovie = {
+      challenge_Id: challenge.id,
+      movie_title: challenge.movie?.title,
+      movie_poster: challenge.movie?.poster_url,
+      movie_id: challenge.movie?.id,
+      creator_id: challenge.creator_id,
+      creator_nickname: challenge.creator?.nickname || null,
+      opponent_id: challenge.opponent_id,
+      opponent_nickname: challenge.opponent?.nickname || null,
+      status: challenge.status,
+endTime: new Date(challenge.createdAt.getTime() + challenge.duration * 60 * 1000),
+    };
+
+    return res.status(200).json({ challenge: challengeWithMovie });
   } catch (error) {
     console.error('Fetch Error:', error);
     return res.status(500).json({ error: 'Challenge cannot be found.' });
@@ -49,7 +58,11 @@ export const getChallengesByUser = async (req, res) => {
           { creator_id: req.user.id }
         ]
       },
-      include:[ { model: Movie ,as: 'movie' }]
+      include: [
+        { model: Movie, as: 'movie' },
+        { model: User, as: 'creator', attributes: ['id', 'nickname'] },
+        { model: User, as: 'opponent', attributes: ['id', 'nickname'] },
+      ]
     });
 
     if (challenges.length === 0) {
@@ -57,14 +70,16 @@ export const getChallengesByUser = async (req, res) => {
     }
     const challengesWithMovies = challenges.map(challenge => {
       return  {
-        challenge_Id: challenge.id,
-        movie_title: challenge.movie.title,
-        movie_poster: challenge.movie.poster_url,
-        movie_id: challenge.movie.id,
-        creator_id: challenge.creator_id,
-        opponent_id: challenge.opponent_id,
-        status: challenge.status,
-        duration: challenge.duration,
+       challenge_Id: challenge.id,
+      movie_title: challenge.movie?.title,
+      movie_poster: challenge.movie?.poster_url,
+      movie_id: challenge.movie?.id,
+      creator_id: challenge.creator_id,
+      creator_nickname: challenge.creator?.nickname || null,
+      opponent_id: challenge.opponent_id,
+      opponent_nickname: challenge.opponent?.nickname || null,
+      status: challenge.status,
+endTime: new Date(challenge.createdAt.getTime() + challenge.duration * 60 * 1000),
       };
    
     });

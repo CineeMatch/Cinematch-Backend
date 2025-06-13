@@ -1,4 +1,4 @@
-import { createMovie, deleteMovie, getMovie, getAllMovies, updateMovie, searchMovie, getRandomMovie, getTop10Movies} from "../controllers/movieController.js";
+import { createMovie, deleteMovie, getMovie, getAllMovies, updateMovie, searchMovie, getRandomMovie, getTop10Movies,getMovieRecommendations} from "../controllers/movieController.js";
 import express from "express";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
@@ -12,4 +12,5 @@ router.route("/movie/update/:id").put(authMiddleware,updateMovie);
 router.route("/movie/search").post(authMiddleware, searchMovie);
 router.route("/movie/top10").post(authMiddleware, getTop10Movies);
 router.route("/movie/random").post(authMiddleware, getRandomMovie);
+router.route("/movie/recommend").get(authMiddleware,getMovieRecommendations)
 export default router;
