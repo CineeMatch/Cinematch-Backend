@@ -28,6 +28,7 @@ export default function defineAssociations() {
     through: MovieCategory,
     foreignKey: 'movie_id',
     otherKey: 'category_id',
+    as: 'categories',
   });
   Category.belongsToMany(Movie, {
     through: MovieCategory,
@@ -94,10 +95,16 @@ export default function defineAssociations() {
 
   // MovieTypes.movie_id > MovieCategories.id (mantıksal olarak movie_id -> Movie.id olması gerek)
   Movie.hasMany(MovieType, { foreignKey: 'movie_id' });
+  MovieType.belongsTo(Movie, { foreignKey: 'movie_id' });
   User.hasMany(MovieType, { foreignKey: 'user_id' });
 
   // Friend.js
   Friend.belongsTo(User, { foreignKey: 'user_id', as: 'initiator' });
   Friend.belongsTo(User, { foreignKey: 'friend_id', as: 'receiver' });
+
+  Movie.hasMany(MovieCategory, { foreignKey: 'movie_id' });
+  MovieCategory.belongsTo(Category, { foreignKey: 'category_id' });
+  MovieCategory.belongsTo(Movie, { foreignKey: 'movie_id' });
+
 
 }

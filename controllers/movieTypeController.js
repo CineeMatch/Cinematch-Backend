@@ -152,8 +152,7 @@ export const isOnProfileMovieType = async (req, res) => {
 
     const updatedMovies = [];
 
-    // 2. Yeni seçilen max 10 filmi true yap
-    const limitedMovieIds = movie_ids.slice(0, 10);
+    const limitedMovieIds = movie_ids.slice(0, 5);
 
     for (const movie_id of limitedMovieIds) {
       let movieType = await MovieType.findOne({
@@ -188,5 +187,65 @@ export const isOnProfileMovieType = async (req, res) => {
   }
 };
 
+export const getUserMovieTypesbyUser = async (req, res) => {
+  // queryden alındığı için routeda http://localhost:3000/api/movieTypes?type=favorite gibi bir istek yapılmalı
+  try {
+    const userId = req.user.id;
+    const type = req.query.type; // Örn: 'favorite', 'wishlist', 'watched'
 
+    if (!["favorite", "wishlist", "watched"].includes(type)) {
+      return res.status(400).json({ message: "Invalid type parameter" });
+    }
+
+    let whereCondition = {};
+
+    if (type === "favorite") {
+      whereCondition.favoriteMovies = true;
+    } else if (type === "wishlist") {
+      whereCondition.wishlistMovies = true;
+    } else if (type === "watched") {
+      whereCondition.watchedMovies = true;
+    }
+
+    const movieTypes = await MovieType.findAll({
+      where: {
+        ...whereCondition,
+        user_id: userId, 
+      },
+    });
+
+    const count = movieTypes.length;
+    res.status(200).json({ count, data: movieTypes });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message:  `Error fetching user movie types - ${error.message}` });
+  }
+};
+
+export const getUserMovieTypesCounts = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ message: "userId is requeid" });
+    }
+
+    const [favoriteCount, wishlistCount, watchedCount] = await Promise.all([
+      MovieType.count({ where: { user_id: userId, favoriteMovies: true } }),
+      MovieType.count({ where: { user_id: userId, wishlistMovies: true } }),
+      MovieType.count({ where: { user_id: userId, watchedMovies: true } }),
+    ]);
+
+    res.status(200).json({
+      userId,
+      favoriteCount,
+      wishlistCount,
+      watchedCount,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message:  `Error fetching user movie list counts - ${error.message}` });
+  }
+};
 

@@ -9,8 +9,6 @@ const CoMatchSuggestion = sequelize.define('CoMatchSuggestion', {
   match_id: DataTypes.INTEGER,
 
   shared_movies_count: DataTypes.INTEGER,
-
-  created_at: DataTypes.DATE,
 }, 
 
 {

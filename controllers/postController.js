@@ -1,5 +1,7 @@
 import Post from "../models/post.js";
 import User from "../models/user.js";
+import Movie from "../models/movie.js";
+import Category from "../models/category.js";
 
 export const getAllPosts = async (req, res) => {
     try {
@@ -24,8 +26,49 @@ export const getPostById = async (req, res) => {
     }
 }
 
+export const getPostsByCategoryId = async (req, res) => {
+  const categoryId = req.params.categoryId;
+  console.log("Category ID:", categoryId);
+
+  try {
+    const posts = await Post.findAll({
+      include: [
+        {
+          model: Movie,
+          required: true,
+          include: [
+            {
+              model: Category,
+              as: "categories", 
+              where: { id: categoryId },
+              required: true,
+              through: { attributes: [] },
+            },
+          ],
+        },
+        {
+          model: User,
+          attributes: ["nickname"],
+        },
+      ],
+    });
+
+    const response = posts.map((post) => ({
+      id: post.id,
+      text: post.contentText,
+      nickname: post.User.nickname,
+      selectedMovie: post.Movie.name,
+    }));
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error("Error fetching posts by category:", error);
+    res.status(500).json({ message:  `Error fetching posts by category: ${error.message}` });
+  }
+};
+
 export const getPostByUserId = async (req, res) => {
-    const userId = req.user.id;
+    const userId = req.params.userId;
     try {
         const existingUser = await User.findByPk(userId);
         if (!existingUser) {

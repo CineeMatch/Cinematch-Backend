@@ -1,5 +1,6 @@
 import CommentLike from '../models/commentLike.js';
 import Comment from '../models/comment.js';
+import { createNotification } from './notificationController.js';
 import User from '../models/user.js';
 
 export const getAllCommentLikes = async (req, res) => {
@@ -52,6 +53,24 @@ export const createCommentLike = async (req, res) => {
             return res.status(400).json({ message: "You have already liked this comment." });
         }
         const newCommentLike = await CommentLike.create({ user_id: userId, comment_id: comment_id });
+
+        const commentOwnerId = existingComment.user_id;
+
+        if (commentOwnerId !== userId) {
+        req.body = {
+            reciver_id: commentOwnerId,
+            type_id: 2
+        };
+        console.log("Notification body:", req.body);
+
+        const notification = {
+            status: (code) => ({
+            json: (data) => console.log(`[Notification] ${code}:`, data)
+            })
+        };
+
+        await createNotification(req, notification);
+        }
         res.status(201).json(newCommentLike);
     } catch (error) {
         res.status(500).json({ message: `Error creating comment like ${error.message} ` });

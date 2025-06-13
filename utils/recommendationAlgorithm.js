@@ -3,9 +3,28 @@ import MovieType from '../models/movieType.js';
 import MovieCategory from '../models/movieCategory.js';
 import Category from '../models/category.js';
 import { Op } from 'sequelize';
-import User from '../models/User.js';
+import User from '../models/user.js';
 import natural from 'natural';
 
+function cosineSimilarity(vecA, vecB) {
+    const allTerms = new Set([...Object.keys(vecA), ...Object.keys(vecB)]);
+
+    let dotProduct = 0;
+    let normA = 0;
+    let normB = 0;
+
+    for (const term of allTerms) {
+        const a = vecA[term] || 0;
+        const b = vecB[term] || 0;
+
+        dotProduct += a * b;
+        normA += a * a;
+        normB += b * b;
+    }
+
+    if (normA === 0 || normB === 0) return 0;
+    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+}
 
 export async function getUserProfileText(userId) {
     const movieTypes = await MovieType.findAll({
@@ -32,13 +51,12 @@ export async function getUserProfileText(userId) {
         // Yönetmen
         if (movie.director) text += " " + movie.director;
 
-        // Oyuncular (birden fazla varsa virgülle ayrılabilir)
-        if (movie.actor) text += " " + movie.actor;
+        // Oyuncular
+        if (movie.actor) text += " " + movie.actor.split(',').join(' ');
     }
 
     return text.trim();
 }
-
 
 const TfIdf = natural.TfIdf;
 
@@ -70,7 +88,6 @@ export async function findMostSimilarUser(userId) {
     return bestUser;
 }
 
-
 export async function getRecommendationsFromSimilarUser(currentUserId, similarUserId, similarityWeight = 1.0) {
     const currentUserMovieIds = await MovieType.findAll({
         where: { user_id: currentUserId },
@@ -91,7 +108,7 @@ export async function getRecommendationsFromSimilarUser(currentUserId, similarUs
 
             const text = [
                 ...(movie.genre ? movie.genre.split(',') : []),
-                movie.director,
+                ...(movie.director ? [movie.director] : []),
                 ...(movie.actor ? movie.actor.split(',') : [])
             ].join(" ");
 
@@ -107,7 +124,7 @@ export async function getRecommendationsFromSimilarUser(currentUserId, similarUs
     return recommendations;
 }
 
-
+// ✅ TF-IDF tabanlı önerileri hesapla
 export function getTfidfRecommendations(profileText, allMovies) {
     const tfidf = new TfIdf();
     tfidf.addDocument(profileText);
@@ -122,7 +139,6 @@ export function getTfidfRecommendations(profileText, allMovies) {
         return { id: movie.id, title: movie.title, score };
     });
 }
-
 
 export function combineRecommendations(tfidfRecs, socialRecs, weights = { tfidf: 0.7, social: 0.3 }) {
     const combined = new Map();
@@ -146,7 +162,6 @@ export function combineRecommendations(tfidfRecs, socialRecs, weights = { tfidf:
         .slice(0, 10);
 }
 
-
 export async function recommendMoviesForUser(userId) {
     const profileText = await getUserProfileText(userId);
 
@@ -154,7 +169,11 @@ export async function recommendMoviesForUser(userId) {
     const movieCorpus = allMovies.map(movie => ({
         id: movie.id,
         title: movie.title,
-        text: [movie.genre, movie.director, movie.actor].join(" ")
+        text: [
+            ...(movie.genre ? movie.genre.split(',') : []),
+            ...(movie.director ? [movie.director] : []),
+            ...(movie.actor ? movie.actor.split(',') : [])
+        ].join(" ")
     }));
 
     const tfidfRecs = getTfidfRecommendations(profileText, movieCorpus);
