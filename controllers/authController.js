@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { Op } from 'sequelize';
 import dotenv from 'dotenv';
 import  capitalizeWords  from '../utils/wordCapitalizer.js';
+import sendMail from '../utils/mailSender.js';
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET 
@@ -63,5 +64,54 @@ console.log("token :", token);
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+export const forgetPassword = async(req,res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ where: { email: email }});
+    if (!user) {
+     res.status(404).json({message:"Cannot find an user with this email."})
+      
+    }
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${user.nickname}`;
+
+    const emailContent = `
+      <p>Merhaba ${user.name},</p>
+      <p>Sifre sifirlama talebinde bulundunuz. Sifrenizi sifirlamak icin asagidaki baglantiya tiklayin:</p>
+      <a href="${resetLink}">Sifremi Sifirla</a>
+      <p>Bu talebi siz yapmadiysaniz, lutfen bize ulasiniz</p>
+    `;
+
+    await sendMail(user.email, 'Sifre Sifirlama Talebi', emailContent);
+
+   return res.status(200).json({ message: 'Email reset link was sent!' });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({message:"Something went wrong.",error});
+  }
+};
+
+export const resetPassword = async(req,res) => {
+  const { userId, newPassword } = req.body;
+
+  try {
+    const user = await User.findByPk(userId)
+    if (!user) {
+     return  res.status(404).json({message:"Cannot find this user."})
+    }
+       const isMatch = await user.comparePassword(password);
+      if(isMatch) return res.status(400).json({message:"Cannnot use old password."})
+    
+   await User.update({password:newPassword},{where: { id: userId },
+      individualHooks: true} );
+
+    res.status(200).json({ message: 'Password was reset succesfully!' });
+  } catch (error) {
+    console.log(error);
+       return  res.status(500).json({message:"Something went wrong.",error});
+
   }
 };

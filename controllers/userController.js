@@ -156,7 +156,7 @@ export const updateActiveUser = async (req, res) => {
         })
         if (updatedUser[0] === 0) {
       console.log(updatedUser);
-      return res.status(404).json({ message: "User not8 found or not updated." });
+      return res.status(404).json({ message: "User not found or not updated." });
     }
     const user = await User.findByPk(userId);
     return res.status(200).json({ message: "User profile updated successfully.", user });
