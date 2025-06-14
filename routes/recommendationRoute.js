@@ -5,6 +5,7 @@ import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 router.route("/recommendation/recommendForUser").get(authMiddleware, getRecommendationMovieForCurrentUser);
+
 router.route("/recommendations").get(authMiddleware, getAllRecommendations);
 router.route("/recommendation/:id").get(authMiddleware, getRecommendation);
 router.route("/recommendation/create").post(authMiddleware, createRecommendation);
