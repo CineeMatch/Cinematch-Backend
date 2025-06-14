@@ -130,6 +130,6 @@ User.hasMany(ChallangeQuestion, { foreignKey: 'created_by' });
 User.hasMany(ChallangeQuestion, { foreignKey: 'directed_to' });
 
 // MovieTypes.movie_id > MovieCategories.id (mantıksal olarak movie_id -> Movie.id olması gerek)
-Movie.hasMany(MovieType, { foreignKey: 'movie_id' });
-User.hasMany(MovieType, { foreignKey: 'user_id' });
+  Movie.hasMany(MovieType, { foreignKey: 'movie_id' });
+  User.hasMany(MovieType, { foreignKey: 'user_id' });
 }

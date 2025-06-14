@@ -15,7 +15,8 @@ export const getAllMovieTypes = async (req, res) => {
 
 export const getFavoriteMovieTypes = async (req, res) => {
   try {
-    const movieTypes = await MovieType.findAll({ where: { favoriteMovies: true } });
+        const userId=req.user.id
+    const movieTypes = await MovieType.findAll({ where: { favoriteMovies: true ,user_id:userId} });
     const count = movieTypes.length;
     res.status(200).json({count, data: movieTypes});
     
@@ -26,7 +27,8 @@ export const getFavoriteMovieTypes = async (req, res) => {
 
 export const getWishListMovieTypes = async (req, res) => {
   try {
-    const movieTypes = await MovieType.findAll({ where: { wishlistMovies: true } });
+    const userId=req.user.id
+    const movieTypes = await MovieType.findAll({ where: { wishlistMovies: true ,user_id:userId} });
     const count = movieTypes.length;
     res.status(200).json({count, data: movieTypes});
 
