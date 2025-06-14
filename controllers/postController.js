@@ -25,7 +25,7 @@ export const getPostById = async (req, res) => {
 }
 
 export const getPostByUserId = async (req, res) => {
-    const userId = req.user.id;
+    const { userId } = req.params;
     try {
         const existingUser = await User.findByPk(userId);
         if (!existingUser) {
