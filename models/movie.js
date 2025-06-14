@@ -1,6 +1,5 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../configs/database.js';
-import e from 'express';
 
 const Movie = sequelize.define('Movie', {
   id: {
@@ -39,7 +38,7 @@ const Movie = sequelize.define('Movie', {
   categoryId: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'categories',  
+      model: 'categories',
       key: 'id'
     }
   },

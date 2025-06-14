@@ -1,5 +1,6 @@
 import User from "../models/user.js";
 import { Op } from "sequelize";
+import cloudinary from "../configs/cloudinary.js";
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -133,3 +134,33 @@ export const updateActiveUser = async (req, res) => {
     return res.status(500).json({ error: "User could not be updated." });
   }
 };
+
+export const uploadUserAvatar = async (req, res) => {
+  const userId = req.user.id;
+  const base64Image = req.body.url;
+  try {
+    const cloudinaryResult = await cloudinary.v2.uploader.upload(base64Image, {
+      folder: "MR-WA",
+      resource_type: "auto",
+    });
+
+    const updatedUser = await User.update({ profile_image_url: cloudinaryResult.secure_url, profile_image_public_id: cloudinaryResult.public_id }, {
+      where: { id: userId },
+      individualHooks: true
+    })
+    if (updatedUser[0] === 0) {
+      console.log(updatedUser);
+      return res.status(404).json({ message: "User not found or not updated." });
+    }
+    const user = await User.findByPk(userId);
+    return res.status(200).json({
+      message: "User profile updated successfully.",
+      avatarUrl: cloudinaryResult.secure_url // bu kısmı döndür
+    });
+
+
+  } catch (error) {
+    console.error("Update Error:", error);
+    return res.status(500).json({ error: "User could not be updated." });
+  }
+}
