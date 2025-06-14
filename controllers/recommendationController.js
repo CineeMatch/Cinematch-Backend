@@ -1,4 +1,5 @@
-import Recommendation from "../models/recommendation.js";
+import Recommendation from "../models/recommendation.js"
+import { recommendMoviesForUser } from "../utils/recommendationAlgorithm.js";
 //This section probably get updated after making ai.
 
 export const getAllRecommendations = async (req, res) => {
@@ -76,3 +77,20 @@ export const updateRecommendationScore = async (req, res) => {
     return res.status(500).json({ error: "Recommendation could not be updated." });
   }
 };
+
+export const getRecommendationMovieForCurrentUser = async (req, res) => {
+  const userId = req.user.id;
+  try {
+
+    const recommendationMovies = await recommendMoviesForUser(userId);
+    console.log("Recommendation Movies:", recommendationMovies);
+    if (!recommendationMovies || recommendationMovies.length === 0) {
+      return res.status(404).json({ message: "No recommendations found for this user." });
+    }
+
+    return res.status(200).json(recommendationMovies);
+  } catch (error) {
+    console.error('Fetch Error:', error);
+    return res.status(500).json({ error: 'Recommendations cannot be fetched.' });
+  }
+}

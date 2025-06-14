@@ -20,8 +20,14 @@ import MovieType from '../models/movieType.js';
 
 
 export default function defineAssociations() {
+  // Movie -> Category
   Movie.belongsTo(Category, { foreignKey: 'categoryId' });
   Category.hasMany(Movie, { foreignKey: 'categoryId' });
+
+  Movie.hasMany(MovieCategory, { foreignKey: 'movie_id' });
+  MovieCategory.belongsTo(Movie, { foreignKey: 'movie_id' });
+
+  MovieCategory.belongsTo(Category, { foreignKey: 'category_id' }); // ✅ Bu eksikti
 
   // MovieCategories -> Movies, Categories
   Movie.belongsToMany(Category, {
@@ -95,6 +101,8 @@ export default function defineAssociations() {
   // MovieTypes.movie_id > MovieCategories.id (mantıksal olarak movie_id -> Movie.id olması gerek)
   Movie.hasMany(MovieType, { foreignKey: 'movie_id' });
   User.hasMany(MovieType, { foreignKey: 'user_id' });
+  MovieType.belongsTo(Movie, { foreignKey: 'movie_id' }); // ✅ EKSİK OLAN BU
+  MovieType.belongsTo(User, { foreignKey: 'user_id' });  // ✅ EKSİK OLAN BU
 
   // Friend.js
   Friend.belongsTo(User, { foreignKey: 'user_id', as: 'initiator' });
