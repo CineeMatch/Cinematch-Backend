@@ -15,8 +15,7 @@ export const getAllMovieTypes = async (req, res) => {
 
 export const getFavoriteMovieTypes = async (req, res) => {
   try {
-        const userId=req.user.id
-    const movieTypes = await MovieType.findAll({ where: { favoriteMovies: true ,user_id:userId} });
+    const movieTypes = await MovieType.findAll({ where: { favoriteMovies: true } });
     const count = movieTypes.length;
     res.status(200).json({count, data: movieTypes});
     
@@ -27,8 +26,7 @@ export const getFavoriteMovieTypes = async (req, res) => {
 
 export const getWishListMovieTypes = async (req, res) => {
   try {
-    const userId=req.user.id
-    const movieTypes = await MovieType.findAll({ where: { wishlistMovies: true ,user_id:userId} });
+    const movieTypes = await MovieType.findAll({ where: { wishlistMovies: true } });
     const count = movieTypes.length;
     res.status(200).json({count, data: movieTypes});
 
@@ -72,10 +70,6 @@ export const createandUpdateMovieType = async (req, res) => {
       return res.status(400).json({ error: "movie_id is required." });
     }
 
-    if (![favoriteMovies, watchedMovies, wishlistMovies].some(Boolean)) {
-      return res.status(400).json({ error: "At least one list type must be true." });
-    }
-
     const existingUser = await User.findByPk(userId);
     if (!existingUser) {
       return res.status(404).json({ error: "User not found." });
@@ -88,14 +82,21 @@ export const createandUpdateMovieType = async (req, res) => {
 
     const normalized = normalizeMovieFlags({ favoriteMovies, watchedMovies, wishlistMovies });
 
+    const allFalse = !normalized.favoriteMovies && !normalized.watchedMovies && !normalized.wishlistMovies;
+
     const existingRecord = await MovieType.findOne({
       where: { user_id: userId, movie_id }
     });
 
     if (existingRecord) {
-      Object.assign(existingRecord, normalized);
-      await existingRecord.save();
-      return res.status(200).json(existingRecord);
+      if (allFalse) {
+        await existingRecord.destroy();
+        return res.status(200).json({ message: "MovieType entry deleted because all flags are false." });
+      } else {
+        Object.assign(existingRecord, normalized);
+        await existingRecord.save();
+        return res.status(200).json(existingRecord);
+      }
     }
 
     const movieType = await MovieType.create({
@@ -154,8 +155,7 @@ export const isOnProfileMovieType = async (req, res) => {
 
     const updatedMovies = [];
 
-    // 2. Yeni seçilen max 10 filmi true yap
-    const limitedMovieIds = movie_ids.slice(0, 10);
+    const limitedMovieIds = movie_ids.slice(0, 5);
 
     for (const movie_id of limitedMovieIds) {
       let movieType = await MovieType.findOne({
@@ -190,4 +190,67 @@ export const isOnProfileMovieType = async (req, res) => {
   }
 };
 
+export const getUserMovieTypesbyUser = async (req, res) => {
+  // queryden alındığı için routeda http://localhost:3000/api/movieTypes?type=favorite gibi bir istek yapılmalı
+  try {
+    const userId = req.user.id;
+    const type = req.query.type; // Örn: 'favorite', 'wishlist', 'watched'
 
+    if (!["favorite", "wishlist", "watched"].includes(type)) {
+      return res.status(400).json({ message: "Invalid type parameter" });
+    }
+
+    let whereCondition = {};
+
+    if (type === "favorite") {
+      whereCondition.favoriteMovies = true;
+    } else if (type === "wishlist") {
+      whereCondition.wishlistMovies = true;
+    } else if (type === "watched") {
+      whereCondition.watchedMovies = true;
+    }
+
+    const movieTypes = await MovieType.findAll({
+      where: {
+        ...whereCondition,
+        user_id: userId, 
+      },
+    });
+
+    const count = movieTypes.length;
+    res.status(200).json({ count, data: movieTypes });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message:  `Error fetching user movie types - ${error.message}` });
+  }
+};
+
+export const getUserMovieTypesCounts = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ message: "userId is requeid" });
+    }
+
+    const [favoriteCount, wishlistCount, watchedCount] = await Promise.all([
+      MovieType.count({ where: { user_id: userId, favoriteMovies: true } }),
+      MovieType.count({ where: { user_id: userId, wishlistMovies: true } }),
+      MovieType.count({ where: { user_id: userId, watchedMovies: true } }),
+    ]);
+
+    res.status(200).json({
+      userId,
+      favoriteCount,
+      wishlistCount,
+      watchedCount,
+      favoriteList,
+      wishlistList,
+      watchedList,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message:  `Error fetching user movie list counts - ${error.message}` });
+  }
+};

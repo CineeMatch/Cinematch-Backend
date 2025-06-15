@@ -13,6 +13,7 @@ import notificationTypeRoute from './routes/notificationTypeRoute.js';
 import cors from 'cors';
 import defineAssociations from './configs/associtions.js';
 import movieTypeRoute from "./routes/movieTypeRoute.js";
+import friendRoute from "./routes/friendRoute.js";
 
 
 const PORT = 5000;
@@ -32,6 +33,7 @@ app.use("/api/v1",userRoute );
 app.use("/api/v1",initStateRoute );
 app.use("/api/v1",movieTypeRoute)
 app.use("/api/v1",authRoute );
+app.use("/api/v1",friendRoute);
 
 
 
