@@ -9,7 +9,7 @@ import CoMatchSuggestion from '../models/coMatchSuggestion.js';
 import Conversation from '../models/conversation.js';
 import Recommendation from '../models/recommendation.js';
 import Post from '../models/post.js';
-import Comment from '../models/Comment.js';
+import Comment from '../models/comment.js';
 import Like from '../models/like.js';
 import CommentLike from '../models/commentLike.js';
 import Notification from '../models/notification.js';
@@ -97,6 +97,7 @@ export default function defineAssociations() {
   Movie.hasMany(MovieType, { foreignKey: 'movie_id' });
   MovieType.belongsTo(Movie, { foreignKey: 'movie_id' });
   User.hasMany(MovieType, { foreignKey: 'user_id' });
+  MovieType.belongsTo(User, { foreignKey: 'user_id' });
 
   // Friend.js
   Friend.belongsTo(User, { foreignKey: 'user_id', as: 'initiator' });
@@ -105,6 +106,5 @@ export default function defineAssociations() {
   Movie.hasMany(MovieCategory, { foreignKey: 'movie_id' });
   MovieCategory.belongsTo(Category, { foreignKey: 'category_id' });
   MovieCategory.belongsTo(Movie, { foreignKey: 'movie_id' });
-
 
 }

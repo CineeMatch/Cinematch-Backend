@@ -2,6 +2,7 @@ import CommentLike from '../models/commentLike.js';
 import Comment from '../models/comment.js';
 import { createNotification } from './notificationController.js';
 import User from '../models/user.js';
+import { where } from 'sequelize';
 
 export const getAllCommentLikes = async (req, res) => {
     try {
@@ -25,6 +26,27 @@ export const getCommentLikeById = async (req, res) => {
         res.status(500).json({ message: "Error fetching comment like" });
     }
 }
+
+export const getCommentLikesByCommentId = async (req, res) => {
+    const { comment_id } = req.params;
+
+    try {
+        const commentLikes = await CommentLike.findAll({
+            where: { comment_id: comment_id }
+        });
+
+        const likeCount = commentLikes.length;
+
+        res.status(200).json({
+            comment_id,
+            likeCount,
+            likes: commentLikes
+        });
+    } catch (error) {
+        console.error("Fetch error:", error);
+        res.status(500).json({ message: "Error fetching comment likes" });
+    }
+};
 
 export const createCommentLike = async (req, res) => {
     try {
@@ -78,9 +100,15 @@ export const createCommentLike = async (req, res) => {
 }
 
 export const deleteCommentLike = async (req, res) => {
-    const { id } = req.params;
+    const userId = req.user.id;
+    const { comment_id } = req.params;
     try {
-        const existingCommentLike = await CommentLike.findByPk(id);
+        const existingCommentLike = await CommentLike.findOne({
+            where: {
+                comment_id: comment_id,
+                user_id: userId
+            }
+        });
         if (!existingCommentLike) {
             return res.status(404).json({ message: "Comment like not found" });
         }

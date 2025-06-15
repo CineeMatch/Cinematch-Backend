@@ -5,8 +5,21 @@ import Category from "../models/category.js";
 
 export const getAllPosts = async (req, res) => {
     try {
-        const posts = await Post.findAll();
-        res.status(200).json(posts);
+        const posts = await Post.findAll({
+      include: [
+        { model: User, attributes: ['nickname'] },
+        { model: Movie, attributes: ['title'] }
+      ],
+      order: [['createdAt', 'DESC']],
+    });
+       const formatted = posts.map((post) => ({
+      id: post.id,
+      contentText: post.contentText,
+      nickname: post.User?.nickname,
+      movieName: post.Movie?.title,
+    }));
+
+    res.status(200).json(formatted);
     } catch (error) {
         res.status(500).json({ message: "Error fetching posts" });
     }
@@ -55,9 +68,9 @@ export const getPostsByCategoryId = async (req, res) => {
 
     const response = posts.map((post) => ({
       id: post.id,
-      text: post.contentText,
+      contentText: post.contentText,
       nickname: post.User.nickname,
-      selectedMovie: post.Movie.name,
+      movieName: post.Movie?.title,
     }));
 
     res.status(200).json(response);

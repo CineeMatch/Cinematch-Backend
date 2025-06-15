@@ -9,7 +9,7 @@ import CoMatchSuggestion from './coMatchSuggestion.js';
 import Conversation from './conversation.js';
 import Recommendation from './recommendation.js';
 import Post from './post.js';
-import Comment from './Comment.js';
+import Comment from './comment.js';
 import Like from './like.js';
 import CommentLike from './commentLike.js';
 import Notification from './notification.js';

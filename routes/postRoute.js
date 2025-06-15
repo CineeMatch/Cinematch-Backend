@@ -5,7 +5,7 @@ import authMiddleware from "../middlewares/authMiddleware.js";
 const router = Router();
 
 router.route("/posts").get(authMiddleware,getAllPosts);
-router.route("/post/:categoryId").get(authMiddleware,getPostsByCategoryId);
+router.route("/posts/category/:categoryId").get(authMiddleware,getPostsByCategoryId);
 router.route("/post/:id").get(authMiddleware,getPostById);
 router.route("/posts/user/:userId").get(authMiddleware,getPostByUserId);
 router.route("/post/create").post(authMiddleware,createPost);

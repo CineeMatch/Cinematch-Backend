@@ -70,10 +70,6 @@ export const createandUpdateMovieType = async (req, res) => {
       return res.status(400).json({ error: "movie_id is required." });
     }
 
-    if (![favoriteMovies, watchedMovies, wishlistMovies].some(Boolean)) {
-      return res.status(400).json({ error: "At least one list type must be true." });
-    }
-
     const existingUser = await User.findByPk(userId);
     if (!existingUser) {
       return res.status(404).json({ error: "User not found." });
@@ -86,14 +82,21 @@ export const createandUpdateMovieType = async (req, res) => {
 
     const normalized = normalizeMovieFlags({ favoriteMovies, watchedMovies, wishlistMovies });
 
+    const allFalse = !normalized.favoriteMovies && !normalized.watchedMovies && !normalized.wishlistMovies;
+
     const existingRecord = await MovieType.findOne({
       where: { user_id: userId, movie_id }
     });
 
     if (existingRecord) {
-      Object.assign(existingRecord, normalized);
-      await existingRecord.save();
-      return res.status(200).json(existingRecord);
+      if (allFalse) {
+        await existingRecord.destroy();
+        return res.status(200).json({ message: "MovieType entry deleted because all flags are false." });
+      } else {
+        Object.assign(existingRecord, normalized);
+        await existingRecord.save();
+        return res.status(200).json(existingRecord);
+      }
     }
 
     const movieType = await MovieType.create({
