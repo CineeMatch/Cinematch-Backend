@@ -1,5 +1,6 @@
 // This controller handles comment-related operations
 import Comment from "../models/comment.js";
+import CommentLike from "../models/commentLike.js";
 import User from "../models/user.js";
 
 // This function retrieves all Comments from the database and sends them as a JSON response.
@@ -58,7 +59,15 @@ export const createComment = async (req, res) => {
       commentText,
       created_at,
     });
-    res.status(201).json(newComment);
+     const fullComment = await Comment.findOne({
+      where: { id: newComment.id },
+      include: {
+        model: User,
+        attributes: ['nickname'],
+      },
+    });
+
+    res.status(201).json(fullComment);
   } catch (error) {
     console.error("Error creating comment:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -171,10 +180,12 @@ export const deleteComment = async (req, res) => {
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
+
+    await CommentLike.destroy({ where: { comment_id: id } });
     await comment.destroy();
     res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {
     console.error("Error deleting comment:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message:` Error deleting comment: ${error.message}` });
   }
 };

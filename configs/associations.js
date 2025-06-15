@@ -29,6 +29,7 @@ export default function defineAssociations() {
     foreignKey: 'movie_id',
     otherKey: 'category_id',
     as: 'categories',
+    
   });
   Category.belongsToMany(Movie, {
     through: MovieCategory,
