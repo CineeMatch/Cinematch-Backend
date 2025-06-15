@@ -28,23 +28,35 @@ export const getCommentLikeById = async (req, res) => {
 }
 
 export const getCommentLikesByCommentId = async (req, res) => {
-    const { comment_id } = req.params;
-
+    const { commentId} = req.params;
     try {
         const commentLikes = await CommentLike.findAll({
-            where: { comment_id: comment_id }
+            where: { comment_id: commentId },
         });
 
         const likeCount = commentLikes.length;
 
         res.status(200).json({
-            comment_id,
+            comment_id: commentId,
             likeCount,
             likes: commentLikes
         });
     } catch (error) {
         console.error("Fetch error:", error);
-        res.status(500).json({ message: "Error fetching comment likes" });
+        res.status(500).json({ message: `Error fetching likes for comment ${comment_id}: ${error.message}` });
+    }
+};
+
+
+export const getUserCommentLikeOnComment=async(req,res)=>{
+    const user=req.user.id
+    const { commentId } = req.params;
+    try {
+        const commentLike=await CommentLike.findOne({where:{comment_id:commentId, user_id:user }});
+        return res.status(200).json({"CommentLike":commentLike});
+    } catch (error) {
+        console.error('Fetch Error:', error);
+        return res.status(500).json({ error: 'Like cannot be found.' });
     }
 };
 

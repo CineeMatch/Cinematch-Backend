@@ -245,6 +245,9 @@ export const getUserMovieTypesCounts = async (req, res) => {
       favoriteCount,
       wishlistCount,
       watchedCount,
+      favoriteList,
+      wishlistList,
+      watchedList,
     });
 
   } catch (error) {

@@ -39,7 +39,7 @@ export const getCommentById = async (req, res) => {
 // This function creates a new comment in the database using the data provided in the request body and sends the created comment as a JSON response.
 export const createComment = async (req, res) => {
   try {
-    const user_id = req.user.id; // Assuming user_id is obtained from the authenticated user
+    const user_id = req.user.id; 
     if (user_id === undefined) {
       return res
         .status(401)
