@@ -30,7 +30,6 @@
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.3",
     "socket.io": "^4.8.1",
-    "streamifier": "^0.1.1",
     "umzug": "^3.8.2"
   }
 }

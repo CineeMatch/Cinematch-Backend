@@ -1,7 +1,7 @@
 import Movie from "../models/movie.js";
 //This section probably get updated after making ai.
 
-export const getAllMovies = async (res) => {
+export const getAllMovies = async (req, res) => {
   try {
     const movies = await Movie.findAll();
     return res.status(200).json(movies);
@@ -10,6 +10,7 @@ export const getAllMovies = async (res) => {
     return res.status(500).json({ error: 'Movies cannot be found.' });
   }
 };
+
 export const getMovie = async (req, res) => {
   try {
     const movie = await Movie.findByPk(id);

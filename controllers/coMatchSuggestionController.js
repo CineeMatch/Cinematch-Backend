@@ -1,6 +1,6 @@
 import CoMatchSuggestion from '../models/coMatchSuggestion.js';
-import MovieType from '../models/movieType.js';
-import { Op } from 'sequelize';
+import User from '../models/user.js';
+import { findMostSimilarUser } from '../utils/recommendationAlgorithm.js';
 
 export const getAllCoMatchSuggestions = async (req, res) => {
   try {
@@ -25,98 +25,71 @@ export const getCoMatchSuggestionById = async (req, res) => {
   }
 }
 
-// TODO: yapay zeka ile gelmiycek bu yüzden bunu nasıl yapabiliriz?
 export const createCoMatchSuggestion = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
 
-    const userFavorites = await MovieType.findAll({
-      where: {
+    const similarUser = await findMostSimilarUser(userId);
+    if (!similarUser || !similarUser.id) {
+      return res.status(404).json({ message: 'No similar user found' });
+    }
+
+    const matchId = similarUser.id;
+
+    // Daha önce önerilmiş mi?
+    const alreadySuggested = await CoMatchSuggestion.findOne({
+      where: { user_id: userId, match_id: matchId }
+    });
+
+    let finalMatchUser = null;
+    //önerilmişse, shared_movies_count artırılacak ve en düşük shared_movies_count olan kullanıcı döndürülecek
+    // değilse, yeni öneri oluşturulacak
+    if (alreadySuggested) {
+      const lowestCountMatch = await CoMatchSuggestion.findOne({
+        where: { user_id: userId },
+        order: [['shared_movies_count', 'ASC']]
+      });
+
+      if (!lowestCountMatch) {
+        return res.status(404).json({ message: 'No match to fallback to' });
+      }
+
+      lowestCountMatch.shared_movies_count += 1;
+      await lowestCountMatch.save();
+
+      finalMatchUser = await User.findByPk(lowestCountMatch.match_id);
+
+      return res.status(200).json({
+        message: 'Similar user was already suggested. Returned lowest count match instead.',
+        match: {
+          ...finalMatchUser.dataValues,
+          shared_movies_count: lowestCountMatch.shared_movies_count
+        }
+      });
+
+    } else {
+      const created = await CoMatchSuggestion.create({
         user_id: userId,
-        favoriteMovies: 1
-      },
-      attributes: ['movie_id']
-    });
+        match_id: matchId,
+        shared_movies_count: 1,
+        created_at: new Date()
+      });
 
-    const userFavoriteMovieIds = userFavorites.map(fav => fav.movie_id);
-
-    if (userFavoriteMovieIds.length === 0) {
-      return res.status(400).json({ error: 'User has no favorite movies.' });
+      return res.status(201).json({
+        message: 'New match suggestion created',
+        match: {
+          ...similarUser,
+          shared_movies_count: created.shared_movies_count
+        }
+      });
     }
-
-    const otherFavorites = await MovieType.findAll({
-      where: {
-        user_id: { [Op.ne]: userId },
-        favoriteMovies: 1,
-        movie_id: { [Op.in]: userFavoriteMovieIds }
-      },
-      attributes: ['user_id', 'movie_id']
-    });
-
-    const matchMap = {};
-
-    otherFavorites.forEach(fav => {
-      if (!matchMap[fav.user_id]) {
-        matchMap[fav.user_id] = new Set();
-      }
-      matchMap[fav.user_id].add(fav.movie_id);
-    });
-
-    const suggestions = [];
-    const now = new Date();
-
-    for (const matchId in matchMap) {
-      const sharedMoviesCount = matchMap[matchId].size;
-
-      if (sharedMoviesCount > 0) {
-        suggestions.push({
-          user_id: userId,
-          match_id: matchId,
-          shared_movies_count: sharedMoviesCount,
-          created_at: now,
-        });
-      }
-    }
-
-    if (suggestions.length === 0) {
-      return res.status(200).json({ message: 'No matching users found.' });
-    }
-
-    await CoMatchSuggestion.bulkCreate(suggestions);
-
-    return res.status(201).json({ message: 'CoMatch suggestions created successfully.', suggestions });
 
   } catch (error) {
-    console.error('Create CoMatchSuggestions Error:', error);
-    return res.status(500).json({ error: 'Failed to create CoMatchSuggestions.' });
+    console.error('Error in createCoMatchSuggestion:', error);
+    return res.status(500).json({ message: `Error creating coMatchSuggestion ${error.message}` });
   }
 };
 
-export const updateCoMatchSuggestion = async (req, res) => {
-  const { id } = req.params;
-  const { user_id, match_id, shared_movies_count } = req.body;
-  try {
-    if (!user_id) {
-      return res.status(400).json({ message: "user_id is required" });
-    }
-    if (!match_id) {
-      return res.status(400).json({ message: "match_id is required" });
-    }
-    const coMatchSuggestion = await CoMatchSuggestion.findByPk(id);
-    if (coMatchSuggestion) {
-      coMatchSuggestion.user_id = user_id;
-      coMatchSuggestion.match_id = match_id;
-      coMatchSuggestion.shared_movies_count = shared_movies_count;
-      coMatchSuggestion.created_at = created_at;
-      await coMatchSuggestion.save();
-      res.status(200).json(coMatchSuggestion);
-    } else {
-      res.status(404).json({ message: "CoMatch suggestion not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Error updating coMatch suggestion" });
-  }
-}
 
 export const deleteCoMatchSuggestion = async (req, res) => {
   const { id } = req.params;

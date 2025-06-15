@@ -9,13 +9,13 @@ import CoMatchSuggestion from './coMatchSuggestion.js';
 import Conversation from './conversation.js';
 import Recommendation from './recommendation.js';
 import Post from './post.js';
-import Comment from './Comment.js';
+import Comment from './comment.js';
 import Like from './like.js';
 import CommentLike from './commentLike.js';
 import Notification from './notification.js';
 import NotificationType from './notificationType.js';
 import Challenge from './challenge.js';
-import ChallengeQuestion from './challengeQuestion.js';
+import ChallangeQuestion from './challengeQuestion.js';
 import MovieType from './movieType.js';
 
 export {
@@ -36,6 +36,6 @@ export {
     Notification,
     NotificationType,
     Challenge,
-    ChallengeQuestion,
+    ChallangeQuestion,
     MovieType
 };
