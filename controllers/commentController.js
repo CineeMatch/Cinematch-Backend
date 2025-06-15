@@ -58,7 +58,15 @@ export const createComment = async (req, res) => {
             commentText,
             created_at,
         });
-        res.status(201).json(newComment);
+        const fullComment = await Comment.findOne({
+            where: { id: newComment.id },
+            include: {
+                model: User,
+                attributes: ['nickname'],
+            },
+        });
+
+        res.status(201).json(fullComment);
     } catch (error) {
         console.error("Error creating comment:", error);
         res.status(500).json({ message: "Internal server error" });

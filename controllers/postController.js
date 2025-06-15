@@ -2,6 +2,9 @@ import Post from "../models/post.js";
 import User from "../models/user.js";
 import Movie from "../models/movie.js";
 import Category from "../models/category.js";
+import Comment from "../models/comment.js";
+import Like from "../models/like.js";
+import CommentLike from "../models/commentLike.js";
 
 export const getAllPosts = async (req, res) => {
     try {
@@ -160,9 +163,18 @@ export const deletePost = async (req, res) => {
         if (!existingPost) {
             return res.status(404).json({ message: "Post not found" });
         }
+        const comments = await Comment.findAll({ where: { post_id: id } });
+        const commentIds = comments.map((c) => c.id);
+
+        await CommentLike.destroy({ where: { comment_id: commentIds } });
+
+        await Comment.destroy({ where: { post_id: id } });
+
+        await Like.destroy({ where: { post_id: id } });
+
         await existingPost.destroy();
         res.status(200).json({ message: "Post deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: "Error deleting post" });
     }
-}
+};
