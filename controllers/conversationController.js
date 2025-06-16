@@ -72,3 +72,22 @@ export const deleteConversation = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
+
+// This function retrieves messages for a specific conversation by its ID, with optional pagination parameters (limit and offset).
+export const getMessagesByChatId = async (req, res) => {
+    const { chatId } = req.params;
+    const { limit = 20, offset = 0 } = req.query;
+
+    try {
+        const messages = await Conversation.findAll({
+            where: { conversation_id: chatId },
+            order: [['sent_at', 'DESC']], // en yeni ilk gelir
+            limit: parseInt(limit),
+            offset: parseInt(offset)
+        });
+
+        res.status(200).json(messages.reverse()); // frontendde eski -> yeni sırayla görünsün
+    } catch (err) {
+        res.status(500).json({ message: 'Mesajlar getirilemedi.', error: err.message });
+    }
+};
