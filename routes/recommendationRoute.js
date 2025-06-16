@@ -1,12 +1,16 @@
-import { createRecommendation, deleteRecommendation, getRecommendation, getAllRecommendations, updateRecommendationScore } from "../controllers/recommendationController.js";
+import { createRecommendation, deleteRecommendation, getRecommendation, getAllRecommendations, updateRecommendationScore, getRecommendationMovieForCurrentUser } from "../controllers/recommendationController.js";
 import express from "express";
+import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.route("/recommendations").get( getAllRecommendations);
-router.route("/recommendation/:id").get( getRecommendation);
-router.route("/recommendation/create").post(createRecommendation);
-router.route("/recommendation/delete/:id").delete(deleteRecommendation);
-router.route("/recommendation/updateScore/:id").put(updateRecommendationScore);
+router.route("/recommendation/recommendForUser").get(authMiddleware, getRecommendationMovieForCurrentUser);
+
+router.route("/recommendations").get(authMiddleware, getAllRecommendations);
+router.route("/recommendation/:id").get(authMiddleware, getRecommendation);
+router.route("/recommendation/create").post(authMiddleware, createRecommendation);
+router.route("/recommendation/delete/:id").delete(authMiddleware, deleteRecommendation);
+router.route("/recommendation/updateScore/:id").put(authMiddleware, updateRecommendationScore);
+
 
 export default router;

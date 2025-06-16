@@ -7,6 +7,7 @@ const Badge = sequelize.define('Badge', {
   image_url: DataTypes.STRING,
   description: DataTypes.TEXT,
   created_at: DataTypes.DATE,
+  updated_at: DataTypes.DATE
 }, {
   tableName: 'badges',
   timestamps: true,

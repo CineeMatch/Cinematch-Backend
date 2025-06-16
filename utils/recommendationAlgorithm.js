@@ -6,6 +6,7 @@ import { Op } from 'sequelize';
 import User from '../models/user.js';
 import natural from 'natural';
 
+// ✅ Cosine Similarity Fonksiyonu
 function cosineSimilarity(vecA, vecB) {
     const allTerms = new Set([...Object.keys(vecA), ...Object.keys(vecB)]);
 
@@ -26,6 +27,7 @@ function cosineSimilarity(vecA, vecB) {
     return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
+// ✅ Kullanıcının izlediği film türlerinden profil metni oluştur
 export async function getUserProfileText(userId) {
     const movieTypes = await MovieType.findAll({
         where: { user_id: userId },
@@ -58,6 +60,7 @@ export async function getUserProfileText(userId) {
     return text.trim();
 }
 
+// ✅ En benzer kullanıcıyı bul
 const TfIdf = natural.TfIdf;
 
 export async function findMostSimilarUser(userId) {
@@ -85,9 +88,12 @@ export async function findMostSimilarUser(userId) {
         }
     }
 
+    console.log(`Most similar user to ${userId} is ${bestUser ? bestUser.id : 'N/A'} with score ${bestScore}`);
+
     return bestUser;
 }
 
+// ✅ Benzer kullanıcıdan öneriler getir
 export async function getRecommendationsFromSimilarUser(currentUserId, similarUserId, similarityWeight = 1.0) {
     const currentUserMovieIds = await MovieType.findAll({
         where: { user_id: currentUserId },
@@ -100,6 +106,7 @@ export async function getRecommendationsFromSimilarUser(currentUserId, similarUs
     });
 
     const recommendations = [];
+
 
     for (const mt of similarUserMovies) {
         if (!currentUserMovieIds.includes(mt.movie_id)) {
@@ -121,6 +128,7 @@ export async function getRecommendationsFromSimilarUser(currentUserId, similarUs
         }
     }
 
+    console.log(`Fetching recommendations from similar user ${recommendations}...`);
     return recommendations;
 }
 
@@ -140,6 +148,7 @@ export function getTfidfRecommendations(profileText, allMovies) {
     });
 }
 
+// ✅ TF-IDF ve sosyal önerileri birleştir
 export function combineRecommendations(tfidfRecs, socialRecs, weights = { tfidf: 0.7, social: 0.3 }) {
     const combined = new Map();
 
@@ -162,6 +171,7 @@ export function combineRecommendations(tfidfRecs, socialRecs, weights = { tfidf:
         .slice(0, 10);
 }
 
+// ✅ Ana öneri fonksiyonu
 export async function recommendMoviesForUser(userId) {
     const profileText = await getUserProfileText(userId);
 

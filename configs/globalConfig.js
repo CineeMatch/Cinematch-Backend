@@ -33,6 +33,13 @@ const globalConfig = {
         password: process.env.SMTP_PASSWORD
     },
 
+    //Cloudinary
+    cloudinary: {
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+        apiKey: process.env.CLOUDINARY_API_KEY,
+        apiSecret: process.env.CLOUDINARY_API_SECRET
+    },
+
     // Frontend URL
     frontendUrl: process.env.FRONTEND_URL
 }

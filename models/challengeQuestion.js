@@ -1,6 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../configs/database.js';
-
+//sor
 const ChallangeQuestion = sequelize.define('ChallangeQuestion', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   challange_id: DataTypes.INTEGER,
