@@ -3,17 +3,17 @@ import User from "../models/user.js";
 import Movie from "../models/movie.js";
 import Category from "../models/category.js";
 import Comment from "../models/comment.js";
-import Like from "../models/like.js";
 import CommentLike from "../models/commentLike.js";
+import Like from "../models/like.js";
 
 export const getAllPosts = async (req, res) => {
     try {
         const posts = await Post.findAll({
             include: [
-                { model: User, attributes: ['nickname'] },
-                { model: Movie, attributes: ['title'] }
+                { model: User, attributes: ["nickname"] },
+                { model: Movie, attributes: ["title"] },
             ],
-            order: [['createdAt', 'DESC']],
+            order: [["createdAt", "DESC"]],
         });
         const formatted = posts.map((post) => ({
             id: post.id,
@@ -26,7 +26,7 @@ export const getAllPosts = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Error fetching posts" });
     }
-}
+};
 
 export const getPostById = async (req, res) => {
     const { id } = req.params;
@@ -40,7 +40,7 @@ export const getPostById = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Error fetching post" });
     }
-}
+};
 
 export const getPostsByCategoryId = async (req, res) => {
     const categoryId = req.params.categoryId;
@@ -79,7 +79,9 @@ export const getPostsByCategoryId = async (req, res) => {
         res.status(200).json(response);
     } catch (error) {
         console.error("Error fetching posts by category:", error);
-        res.status(500).json({ message: `Error fetching posts by category: ${error.message}` });
+        res
+            .status(500)
+            .json({ message: `Error fetching posts by category: ${error.message}` });
     }
 };
 
@@ -91,7 +93,13 @@ export const getPostByUserId = async (req, res) => {
             console.error("User not found");
             return res.status(404).json({ message: "User not found" });
         }
-        const posts = await Post.findAll({ where: { user_id: userId } });
+        const posts = await Post.findAll({
+            where: { user_id: userId },
+            include: [
+                { model: User, attributes: ["nickname"] },
+                { model: Movie, attributes: ["title"] },
+            ],
+        });
         if (posts) {
             console.log("Posts fetched successfully");
             res.status(200).json(posts);
@@ -102,11 +110,11 @@ export const getPostByUserId = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: `Error fetching posts, ${error.message}` });
     }
-}
+};
 
 export const createPost = async (req, res) => {
     try {
-        const userId = req.user.id;;
+        const userId = req.user.id;
         const { movie_id, contentText } = req.body;
 
         if (!userId || !contentText) {
@@ -118,15 +126,18 @@ export const createPost = async (req, res) => {
             throw new Error("User not found");
         }
 
-        const newPost = await Post.create({ user_id: userId, movie_id, contentText: contentText });
+        const newPost = await Post.create({
+            user_id: userId,
+            movie_id,
+            contentText: contentText,
+        });
         console.log("Post created successfully");
         res.status(201).json(newPost);
-
     } catch (error) {
         console.error("Error creating post:", error);
         res.status(500).json({ message: `Error creating post: ${error.message}` });
     }
-}
+};
 
 export const updatePost = async (req, res) => {
     const { id } = req.params;
@@ -154,7 +165,7 @@ export const updatePost = async (req, res) => {
         console.error("Error updating post:", error);
         res.status(500).json({ message: `Error updating post ${error.message}` });
     }
-}
+};
 
 export const deletePost = async (req, res) => {
     const { id } = req.params;
@@ -175,6 +186,6 @@ export const deletePost = async (req, res) => {
         await existingPost.destroy();
         res.status(200).json({ message: "Post deleted successfully" });
     } catch (error) {
-        res.status(500).json({ message: "Error deleting post" });
+        res.status(500).json({ message: `Error deleting post: ${error.message}` });
     }
 };
