@@ -53,11 +53,11 @@ export const removeLike = async (req, res) => {
     if (!like) {
       return res.status(404).json({ error: "This post isn't liked by this user." });
     }
-    const unlike = await Like.destroy({ where: { post_id: req.params.post_id, user_id: user } });
+    const unlike = await Like.destroy({ where: { post_id: req.params.id, user_id: user } });
     return res.status(200).json({ message: "This post unliked by active user successfully.", unlike });
   } catch (error) {
     console.error('Fetch Error:', error);
-    return res.status(500).json({ error: 'Likes cannot be unliked.' });
+    return res.status(500).json({ error: `Like cannot be removed. ${error.message}` });
   }
 };
 

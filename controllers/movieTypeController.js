@@ -234,10 +234,13 @@ export const getUserMovieTypesCounts = async (req, res) => {
       return res.status(400).json({ message: "userId is requeid" });
     }
 
-    const [favoriteCount, wishlistCount, watchedCount] = await Promise.all([
-      MovieType.count({ where: { user_id: userId, favoriteMovies: true } }),
-      MovieType.count({ where: { user_id: userId, wishlistMovies: true } }),
-      MovieType.count({ where: { user_id: userId, watchedMovies: true } }),
+    const [favoriteCount, wishlistCount, watchedCount, favoriteList, wishlistList, watchedList] = await Promise.all([
+      MovieType.count({ where: { user_id: userId, favoriteMovies: true } }) || 0,
+      MovieType.count({ where: { user_id: userId, wishlistMovies: true } } || 0),
+      MovieType.count({ where: { user_id: userId, watchedMovies: true } } || 0),
+      MovieType.findAll({ where: { user_id: userId, favoriteMovies: true } }),
+      MovieType.findAll({ where: { user_id: userId, wishlistMovies: true } }),
+      MovieType.findAll({ where: { user_id: userId, watchedMovies: true } }),
     ]);
 
     res.status(200).json({
@@ -249,7 +252,6 @@ export const getUserMovieTypesCounts = async (req, res) => {
       wishlistList,
       watchedList,
     });
-
   } catch (error) {
     res.status(500).json({ message: `Error fetching user movie list counts - ${error.message}` });
   }
