@@ -1,4 +1,5 @@
-import { getAllMovieTypes, getFavoriteMovieTypes, getWatchedMovieTypes, getWishListMovieTypes, getMovieTypeById, createandUpdateMovieType, deleteMovieType, isOnProfileMovieType, getUserMovieTypesCounts,getUserMovieTypesbyUser } from "../controllers/movieTypeController.js";
+import { getAllMovieTypes, getFavoriteMovieTypes, getWatchedMovieTypes, getWishListMovieTypes, getMovieTypeById, createandUpdateMovieType, 
+deleteMovieType, isOnProfileMovieType, getUserMovieTypesCounts,getUserMovieTypesbyUser, getMovieTypeOnProfileByUser } from "../controllers/movieTypeController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { Router } from "express";
 
@@ -10,6 +11,7 @@ router.route("/movieTypes/wishlist").get(authMiddleware, getWishListMovieTypes);
 router.route("/movieTypes/watched").get(authMiddleware, getWatchedMovieTypes);
 router.route("/movieType/user-by-type").get(authMiddleware, getUserMovieTypesbyUser);
 router.route("/movieType/:userId/counts").get(authMiddleware, getUserMovieTypesCounts);
+router.route("/movieType/on-profile/:user_id").get(authMiddleware, getMovieTypeOnProfileByUser);
 
 router.route("/movieType/:id").get(authMiddleware, getMovieTypeById);
 router.route("/movieType/create").post(authMiddleware, createandUpdateMovieType);

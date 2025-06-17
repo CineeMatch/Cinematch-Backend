@@ -6,7 +6,7 @@ const Challenge = sequelize.define('Challenge', {
   movie_id: DataTypes.INTEGER,
   creator_id: DataTypes.INTEGER,
   opponent_id: DataTypes.INTEGER,
-  status: DataTypes.ENUM('pending', 'answered', 'completed'),
+  status: DataTypes.ENUM('pending', 'accepted','answered', ),
   duration: DataTypes.INTEGER,
 }, {
   tableName: 'challenges',
