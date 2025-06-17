@@ -1,9 +1,7 @@
 import CoMatchSuggestion from '../models/coMatchSuggestion.js';
 import User from '../models/user.js';
 import { findMostSimilarUser } from '../utils/recommendationAlgorithm.js';
-
-import MovieType from '../models/movieType.js';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from "sequelize";
 
 export const getAllCoMatchSuggestions = async (req, res) => {
     try {
@@ -32,9 +30,15 @@ export const createCoMatchSuggestion = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const similarUser = await findMostSimilarUser(userId);
+    let similarUser = await findMostSimilarUser(userId);
     if (!similarUser || !similarUser.id) {
-      return res.status(404).json({ message: 'No similar user found' });
+      similarUser = await User.findOne({
+        where: { id: { [Op.ne]: userId } }, // kendisi hariç
+        order: Sequelize.literal('RAND()')
+      });
+      if (!similarUser) {
+        return res.status(404).json({ message: 'No similar user found' });
+      }
     }
 
     const matchId = similarUser.id;

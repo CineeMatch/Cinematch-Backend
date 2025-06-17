@@ -120,7 +120,7 @@ export const createFriend = async (req, res) => {
     });
 
     const type_id = 1;
-    req.body = { reciver_id: friendId, type_id };
+    req.body = { reciver_id: friend_id, type_id };
 
     const notification = {
       status: (code) => ({
