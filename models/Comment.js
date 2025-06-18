@@ -6,9 +6,8 @@ const Comment = sequelize.define('Comment', {
   post_id: DataTypes.INTEGER,
   user_id: DataTypes.INTEGER,
   commentText: DataTypes.TEXT,
-  created_at: DataTypes.DATE,
 }, {
   tableName: 'comments',
-  timestamps: false,
+  timestamps: true,
 });
 export default Comment;
