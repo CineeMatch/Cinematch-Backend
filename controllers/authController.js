@@ -70,7 +70,7 @@ export const forgetPassword = async(req,res) => {
       
     }
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${user.nickname}`;
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${user.id}`;
 
     const emailContent = `
       <p>Merhaba ${user.name},</p>
@@ -96,7 +96,7 @@ export const resetPassword = async(req,res) => {
     if (!user) {
      return  res.status(404).json({message:"Cannot find this user."})
     }
-       const isMatch = await user.comparePassword(password);
+       const isMatch = await user.comparePassword(newPassword);
       if(isMatch) return res.status(400).json({message:"Cannnot use old password."})
     
    await User.update({password:newPassword},{where: { id: userId },
@@ -105,7 +105,7 @@ export const resetPassword = async(req,res) => {
     res.status(200).json({ message: 'Password was reset succesfully!' });
   } catch (error) {
     console.log(error);
-       return  res.status(500).json({message:"Something went wrong.",error});
+       return  res.status(500).json({message: `Error while resetting password: ${error.message}`});
 
   }
 };
