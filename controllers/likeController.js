@@ -60,4 +60,3 @@ export const removeLike = async (req, res) => {
     return res.status(500).json({ error: `Like cannot be removed. ${error.message}` });
   }
 };
-

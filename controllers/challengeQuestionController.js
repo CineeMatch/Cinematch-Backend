@@ -10,10 +10,10 @@ export const getAllChallengeQuestions = async (req, res) => {
             return res.status(404).json({ message: "No challenge questions found" });
         }
 
-        res.status(200).json(challengeQuestions);
+        return res.status(200).json(challengeQuestions);
     } catch (error) {
         console.error("Error fetching challenge questions:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -28,10 +28,10 @@ export const getChallengeQuestionById = async (req, res) => {
         if (!challengeQuestion) {
             return res.status(404).json({ message: "Challenge question not found" });
         }
-        res.status(200).json(challengeQuestion);
+        return res.status(200).json(challengeQuestion);
     } catch (error) {
         console.error("Error fetching challenge question:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -48,10 +48,10 @@ export const createChallengeQuestion = async (req, res) => {
         }
         const answered_at = new Date(); // Set the answered_at date to the current date and time
         const newChallengeQuestion = await ChallengeQuestion.create({ questionText, correct_answer, challenge_id, created_by, directed_to, answered_at });
-        res.status(201).json(newChallengeQuestion);
+        return res.status(201).json(newChallengeQuestion);
     } catch (error) {
         console.error("Error creating challenge question:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -76,10 +76,10 @@ export const updateChallengeQuestion = async (req, res) => {
         challengeQuestion.created_by = created_by || challengeQuestion.created_by;
         challengeQuestion.directed_to = directed_to || challengeQuestion.directed_to;
         await challengeQuestion.save();
-        res.status(200).json(challengeQuestion);
+        return res.status(200).json(challengeQuestion);
     } catch (error) {
         console.error("Error updating challenge question:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -92,9 +92,9 @@ export const deleteChallengeQuestion = async (req, res) => {
             return res.status(404).json({ message: "Challenge question not found" });
         }
         await challengeQuestion.destroy();
-        res.status(200).json({ message: "Challenge question deleted successfully" });
+        return res.status(200).json({ message: "Challenge question deleted successfully" });
     } catch (error) {
         console.error("Error deleting challenge question:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
