@@ -5,12 +5,11 @@ const Badge = sequelize.define('Badge', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   name: DataTypes.STRING,
   image_url: DataTypes.STRING,
+  image_url_public_id: DataTypes.STRING,
   description: DataTypes.TEXT,
-  created_at: DataTypes.DATE,
-  updated_at: DataTypes.DATE
 }, {
   tableName: 'badges',
-  timestamps: false,
+  timestamps: true,
 });
 
 export default Badge;
