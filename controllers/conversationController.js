@@ -91,3 +91,5 @@ export const getMessagesByChatId = async (req, res) => {
         res.status(500).json({ message: 'Mesajlar getirilemedi.', error: err.message });
     }
 };
+
+
