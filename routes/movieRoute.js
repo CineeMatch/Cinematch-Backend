@@ -5,7 +5,6 @@ import authMiddleware from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 router.route("/movies").get( authMiddleware,getAllMovies);
-router.route("/movie/recommend").get(authMiddleware,getMovieRecommendations)
 
 router.route("/movie/:id").get( authMiddleware,getMovie);
 router.route("/movie/create").post(authMiddleware,createMovie);
