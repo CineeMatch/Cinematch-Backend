@@ -293,3 +293,4 @@ export const getUserMovieTypesCounts = async (req, res) => {
   }
 };
 
+

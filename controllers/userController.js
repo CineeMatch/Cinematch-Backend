@@ -140,7 +140,7 @@ export const uploadUserAvatar = async (req, res) => {
   const base64Image = req.body.url;
   try {
     const cloudinaryResult = await cloudinary.v2.uploader.upload(base64Image, {
-      folder: "MR-WA",
+      folder: "MR-WA-Avatar",
       resource_type: "auto",
     });
 
@@ -152,7 +152,7 @@ export const uploadUserAvatar = async (req, res) => {
       console.log(updatedUser);
       return res.status(404).json({ message: "User not found or not updated." });
     }
-    const user = await User.findByPk(userId);
+ 
     return res.status(200).json({
       message: "User profile updated successfully.",
       avatarUrl: cloudinaryResult.secure_url // bu kısmı döndür

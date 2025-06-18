@@ -2,6 +2,8 @@
 import Comment from "../models/comment.js";
 import CommentLike from "../models/commentLike.js";
 import User from "../models/user.js";
+import { gainBadge } from "../utils/gainBadge.js";
+import { gainLevel } from "../utils/gainLevel.js";
 
 // This function retrieves all Comments from the database and sends them as a JSON response.
 export const getAllComments = async (req, res) => {
@@ -12,10 +14,10 @@ export const getAllComments = async (req, res) => {
       return res.status(404).json({ message: "No comments found" });
     }
 
-    res.status(200).json(comments);
+    return res.status(200).json(comments);
   } catch (error) {
     console.error("Error fetching comments:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -30,10 +32,10 @@ export const getCommentById = async (req, res) => {
     if (!comment) {
       return res.status(404).json({ message: "Comment not found" });
     }
-    res.status(200).json(comment);
+    return res.status(200).json(comment);
   } catch (error) {
     console.error("Error fetching comment:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -52,25 +54,39 @@ export const createComment = async (req, res) => {
         .status(400)
         .json({ message: "Post ID and comment text are required" });
     }
-    const created_at = new Date(); // Set the created_at date to the current date and time
+
     const newComment = await Comment.create({
       post_id,
       user_id,
       commentText,
-      created_at,
     });
-     const fullComment = await Comment.findOne({
-      where: { id: newComment.id },
-      include: {
-        model: User,
-        attributes: ['nickname'],
-      },
-    });
+    const commentCount = await Comment.count({ where: { user_id } });
 
-    res.status(201).json(fullComment);
+        gainLevel(user_id, "comment");
+
+    if (commentCount === 1) {
+        gainBadge(user_id, "First Comment");
+    } else if (commentCount === 50) {
+        gainBadge(user_id, "Commenter");
+    } else if (commentCount === 100) {
+        gainBadge(user_id, "Criticiser");
+    } else if (commentCount === 500) {
+        gainBadge(user_id, "Comment Machine");
+    } else if (commentCount === 1000) {
+        gainBadge(user_id, "Master Criticiser");
+    }
+    const fullComment = await Comment.findOne({
+    where: { id: newComment.id },
+    include: {
+      model: User,
+      attributes: ['nickname'],
+    },
+  });
+
+    return res.status(201).json(fullComment);
   } catch (error) {
     console.error("Error creating comment:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -86,15 +102,15 @@ export const getCommentsByPostId = async (req, res) => {
           attributes: ["nickname"],
         },
       ],
-      order: [["created_at", "DESC"]],
+      order: [["createdAt", "DESC"]],
     });
     if (!comments || comments.length === 0) {
       return res.status(200).json([]); 
     }
-    res.status(200).json(comments);
+    return res.status(200).json(comments);
   } catch (error) {
     console.error("Error fetching comments by post ID:", error);
-    res.status(500).json({ message: `Internal server error ${error.message}` });
+    return res.status(500).json({ message: `Internal server error ${error.message}` });
   }
 };
 
@@ -113,10 +129,10 @@ export const getCommentsByCurrentUserId = async (req, res) => {
         .status(404)
         .json({ message: "No comments found for this user" });
     }
-    res.status(200).json(comments);
+    return res.status(200).json(comments);
   } catch (error) {
     console.error("Error fetching comments by user ID:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -133,10 +149,10 @@ export const getCommentsByUserId = async (req, res) => {
         .status(404)
         .json({ message: "No comments found for this user" });
     }
-    res.status(200).json(comments);
+    return res.status(200).json(comments);
   } catch (error) {
     console.error("Error fetching comments by user ID:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -160,12 +176,11 @@ export const updateComment = async (req, res) => {
     comment.post_id = post_id;
     comment.user_id = user_id;
     comment.commentText = commentText;
-    comment.updated_at = new Date(); // Update the updated_at date to the current date and time
     await comment.save();
-    res.status(200).json(comment);
+    return res.status(200).json(comment);
   } catch (error) {
     console.error("Error updating comment:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -183,9 +198,9 @@ export const deleteComment = async (req, res) => {
 
     await CommentLike.destroy({ where: { comment_id: id } });
     await comment.destroy();
-    res.status(200).json({ message: "Comment deleted successfully" });
+    return res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {
     console.error("Error deleting comment:", error);
-    res.status(500).json({ message:` Error deleting comment: ${error.message}` });
+    return res.status(500).json({ message:` Error deleting comment: ${error.message}` });
   }
 };

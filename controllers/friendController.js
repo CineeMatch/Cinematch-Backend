@@ -80,16 +80,15 @@ export const getFriendById = async (req, res) => {
 export const createFriend = async (req, res) => {
   try {
     const userId = req.user.id;
-    console.log("User ID from token:", userId);
-    const { friend_id } = req.body;
-    console.log("Friend ID from request body:", friend_id);
+    const { friendId } = req.body;
+    console.log("Friend ID from request body:", friendId);
     if (!userId || !friend_id) {
       return res
         .status(400)
         .json({ message: "userId and friendId are required." });
     }
 
-    if (userId === friend_id) {
+    if (userId === friendId) {
       return res
         .status(400)
         .json({ message: "You cannot add yourself as a friend." });
@@ -99,7 +98,7 @@ export const createFriend = async (req, res) => {
     if (!existingUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    const existingFriend = await User.findByPk(friend_id);
+    const existingFriend = await User.findByPk(friendId);
     if (!existingFriend) {
       return res.status(404).json({ message: "Friend not found" });
     }
@@ -107,7 +106,7 @@ export const createFriend = async (req, res) => {
     const existingFriendship = await Friend.findOne({
       where: {
         user_id: userId,
-        friend_id: friend_id,
+        friend_id: friendId,
       },
     });
     if (existingFriendship) {
@@ -115,12 +114,12 @@ export const createFriend = async (req, res) => {
     }
     const newFriend = await Friend.create({
       user_id: userId,
-      friend_id: friend_id,
+      friend_id: friendId,
       status: "pending",
     });
 
     const type_id = 1;
-    req.body = { reciver_id: friend_id, type_id };
+    req.body = { reciver_id: friendId, type_id };
 
     const notification = {
       status: (code) => ({
@@ -144,9 +143,6 @@ export const createFriendForNickname = async (req, res) => {
   try {
     const userId = req.user.id;
     const { nickname } = req.body;
-
-    console.log("User ID from token:", userId);
-    console.log("Friend nickname from request body:", nickname);
 
     if (!userId || !nickname) {
       return res

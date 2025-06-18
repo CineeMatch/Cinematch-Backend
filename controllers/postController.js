@@ -93,7 +93,13 @@ export const getPostByUserId = async (req, res) => {
       console.error("User not found");
       return res.status(404).json({ message: "User not found" });
     }
-    const posts = await Post.findAll({ where: { user_id: userId } });
+    const posts = await Post.findAll({
+            where: { user_id: userId },
+            include: [
+                { model: User, attributes: ["nickname"] },
+                { model: Movie, attributes: ["title"] },
+            ],
+        });
     if (posts) {
       console.log("Posts fetched successfully");
       res.status(200).json(posts);
@@ -183,3 +189,46 @@ export const deletePost = async (req, res) => {
     res.status(500).json({ message: `Error deleting post: ${error.message}` });
   }
 };
+
+export const getPostsUserByCategoryId = async (req, res) => {
+    const userId = req.user.id;
+    const categoryId = req.params.categoryId;
+
+    try {
+        const posts = await Post.findAll({
+            where: { user_id: userId },
+            include: [
+                {
+                    model: Movie,
+                    required: true,
+                    include: [
+                        {
+                            model: Category,
+                            as: "categories",
+                            where: { id: categoryId },
+                            required: true,
+                        },
+                    ],
+                },
+                {
+                    model: User,
+                    attributes: ["nickname"],
+                },
+            ],
+        });
+
+        const response = posts.map((post) => ({
+            id: post.id,
+            contentText: post.contentText,
+            nickname: post.User.nickname,
+            movieName: post.Movie?.title,
+        }));
+
+        res.status(200).json(response);
+    } catch (error) {
+        console.error("Error fetching posts by user and category:", error);
+        res
+            .status(500)
+            .json({ message: `Error fetching posts by user and category: ${error.message}` });
+    }
+}

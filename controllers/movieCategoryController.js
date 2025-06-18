@@ -7,10 +7,10 @@ export const getAllMovieCategories = async (req, res) => {
         if (!movieCategories || movieCategories.length === 0) {
             return res.status(404).json({ message: "No movie categories found" });
         }
-        res.status(200).json(movieCategories);
+        return res.status(200).json(movieCategories);
     } catch (error) {
         console.error("Error fetching movie categories:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -25,10 +25,10 @@ export const getMovieCategoryById = async (req, res) => {
         if (!movieCategory) {
             return res.status(404).json({ message: "Movie category not found" });
         }
-        res.status(200).json(movieCategory);
+        return res.status(200).json(movieCategory);
     } catch (error) {
         console.error("Error fetching movie category:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -40,10 +40,10 @@ export const createMovieCategory = async (req, res) => {
             return res.status(400).json({ message: "Movie ID and category ID are required" });
         }
         const newMovieCategory = await MovieCategory.create({ movie_id, category_id });
-        res.status(201).json(newMovieCategory);
+        return res.status(201).json(newMovieCategory);
     } catch (error) {
         console.error("Error creating movie category:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -71,10 +71,10 @@ export const updateMovieCategory = async (req, res) => {
         const newMovieCategoryData = { movie_id, category_id };
 
         await movieCategory.update(newMovieCategoryData);
-        res.status(200).json(movieCategory);
+        return res.status(200).json(movieCategory);
     } catch (error) {
         console.error("Error updating movie category:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -90,9 +90,9 @@ export const deleteMovieCategory = async (req, res) => {
             return res.status(404).json({ message: "Movie category not found" });
         }
         await movieCategory.destroy();
-        res.status(200).json({ message: "Movie category deleted successfully" });
+        return res.status(200).json({ message: "Movie category deleted successfully" });
     } catch (error) {
         console.error("Error deleting movie category:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }

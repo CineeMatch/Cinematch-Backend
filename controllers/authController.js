@@ -52,7 +52,6 @@ export const login = async (req, res) => {
       JWT_SECRET,
       { expiresIn: '2h' }
     );
-  console.log("token :", token);
     return res.json({ message: 'Loged in successfully', token });
   } catch (err) {
     console.error('Login error:', err);

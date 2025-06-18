@@ -1,5 +1,6 @@
 // This controller handles badge-related operations
 import Badge from "../models/badge.js";
+import cloudinary from "../configs/cloudinary.js";
 
 // This function retrieves all badges from the database and sends them as a JSON response.
 export const getAllBadges = async (req, res) => {
@@ -10,10 +11,10 @@ export const getAllBadges = async (req, res) => {
             return res.status(404).json({ message: "No badges found" });
         }
 
-        res.status(200).json(badges);
+        return res.status(200).json(badges);
     } catch (error) {
         console.error("Error fetching badges:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -25,10 +26,10 @@ export const getBadgeById = async (req, res) => {
         if (!badge) {
             return res.status(404).json({ message: "Badge not found" });
         }
-        res.status(200).json(badge);
+        return res.status(200).json(badge);
     } catch (error) {
         console.error("Error fetching badge:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -36,12 +37,11 @@ export const getBadgeById = async (req, res) => {
 export const createBadge = async (req, res) => {
     try {
         const { name, image_url, description } = req.body;
-        const created_at = new Date(); // Set the created_at date to the current date and time
-        const newBadge = await Badge.create({ name, image_url, description, created_at });
-        res.status(201).json(newBadge);
+        const newBadge = await Badge.create({ name, image_url, description });
+        return res.status(201).json(newBadge);
     } catch (error) {
         console.error("Error creating badge:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -58,13 +58,12 @@ export const updateBadge = async (req, res) => {
         badge.name = name || badge.name; // Update only if new value is provided
         badge.image_url = image_url || badge.image_url; // Update only if new value is provided
         badge.description = description || badge.description; // Update only if new value is provided
-        badge.updated_at = new Date(); // Set the updated_at date to the current date and time
 
         await badge.save();
-        res.status(200).json(badge);
+        return res.status(200).json(badge);
     } catch (error) {
         console.error("Error updating badge:", error);
-        res.status(500).json({ message: `Internal server error ${error.message}` });
+        return res.status(500).json({ message: `Internal server error ${error.message}` });
     }
 }
 
@@ -77,9 +76,27 @@ export const deleteBadge = async (req, res) => {
             return res.status(404).json({ message: "Badge not found" });
         }
         await badge.destroy();
-        res.status(200).json({ message: "Badge deleted successfully" });
+        return res.status(200).json({ message: "Badge deleted successfully" });
     } catch (error) {
         console.error("Error deleting badge:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+export const createBadgeFromFrontend = async (req, res) => {
+    try {
+        const { name, image, description } = req.body;
+
+        const cloudinaryResult = await cloudinary.v2.uploader.upload(image, {
+            folder: "MR-WA-Badge",
+            resource_type: "auto",
+        });
+        console.log("Cloudinary upload result:", cloudinaryResult);
+
+        const newBadge = await Badge.create({ name, image_url: cloudinaryResult.secure_url, image_url_public_id: cloudinaryResult.public_id, description });
+        return res.status(201).json(newBadge);
+    } catch (error) {
+        console.error("Error creating badge from frontend:", error);
+        return res.status(500).json({ message: "Internal server error" });
     }
 }

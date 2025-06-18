@@ -41,6 +41,10 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     defaultValue: 1,
   },
+  point: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,

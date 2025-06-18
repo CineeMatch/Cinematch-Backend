@@ -10,10 +10,10 @@ export const getAllNotificationTypes = async (req, res) => {
             return res.status(404).json({ message: "No notification types found" });
         }
 
-        res.status(200).json(notificationTypes);
+        return res.status(200).json(notificationTypes);
     } catch (error) {
         console.error("Error fetching notification types:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -31,10 +31,10 @@ export const getNotificationTypeById = async (req, res) => {
         if (!notificationType) {
             return res.status(404).json({ message: "Notification type not found" });
         }
-        res.status(200).json(notificationType);
+        return res.status(200).json(notificationType);
     } catch (error) {
         console.error("Error fetching notification type:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -54,10 +54,10 @@ export const createNotificationType = async (req, res) => {
         }
 
         const newNotificationType = await NotificationType.create({ typeName, messageContent });
-        res.status(201).json(newNotificationType);
+        return res.status(201).json(newNotificationType);
     } catch (error) {
         console.error("Error creating notification type:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -82,10 +82,10 @@ export const updateNotificationType = async (req, res) => {
         notificationType.messageContent = messageContent || notificationType.messageContent; // Update only if new value is provided
 
         await notificationType.update({ typeName, messageContent });
-        res.status(200).json(notificationType);
+        return res.status(200).json(notificationType);
     } catch (error) {
         console.error("Error updating notification type:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -105,9 +105,9 @@ export const deleteNotificationType = async (req, res) => {
         }
 
         await notificationType.destroy();
-        res.status(200).json({ message: "Notification type deleted successfully" });
+        return res.status(200).json({ message: "Notification type deleted successfully" });
     } catch (error) {
         console.error("Error deleting notification type:", error);
-        res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" });
     }
 }

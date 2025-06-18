@@ -41,7 +41,7 @@ export default function defineAssociations() {
   User.hasMany(UserBadge, { foreignKey: 'user_id' });
   Badge.hasMany(UserBadge, { foreignKey: 'badge_id' });
   UserBadge.belongsTo(User, { foreignKey: 'user_id' });
-  UserBadge.belongsTo(Badge, { foreignKey: 'badge_id' });
+  UserBadge.belongsTo(Badge, { foreignKey: 'badge_id', as: 'badge' });
 
   // Friends -> Users (iki yönlü)
   User.hasMany(Friend, { foreignKey: 'user_id', as: 'friends' });
