@@ -7,7 +7,7 @@ const router = Router();
 router.route("/friends").get(authMiddleware, getAllFriends);
 router.route("/friend/user").get(authMiddleware, getUserFriends);
 router.route("/friend/:id").get(authMiddleware, getFriendById);
-router.route("/friend/create").post(authMiddleware, createFriend);
+router.route("/friend/create/:friendId").post(authMiddleware, createFriend);
 router.route("/friend/createforNickname").post(authMiddleware, createFriendForNickname);
 router.route("/friend/delete/:friendId").delete(authMiddleware, deleteFriend);
 router.route("/friend/accept").put(authMiddleware, acceptFriendRequest);
