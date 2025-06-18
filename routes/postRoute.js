@@ -1,4 +1,4 @@
-import { getAllPosts, getPostById, getPostByUserId, createPost, deletePost, updatePost, getPostsByCategoryId } from "../controllers/postController.js";
+import { getAllPosts, getPostById, getPostByUserId, createPost, deletePost, updatePost, getPostsByCategoryId, getPostsUserByCategoryId } from "../controllers/postController.js";
 import { Router } from "express";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
@@ -11,5 +11,6 @@ router.route("/posts/user/:userId").get(authMiddleware, getPostByUserId);
 router.route("/post/create").post(authMiddleware, createPost);
 router.route("/post/update/:id").put(authMiddleware, updatePost);
 router.route("/post/delete/:id").delete(authMiddleware, deletePost);
+router.route("/posts/user/category/:categoryId").get(authMiddleware, getPostsUserByCategoryId);
 
 export default router;
