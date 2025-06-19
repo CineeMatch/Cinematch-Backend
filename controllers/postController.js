@@ -209,8 +209,8 @@ export const deletePost = async (req, res) => {
 };
 
 export const getPostsUserByCategoryId = async (req, res) => {
-  const userId = req.user.id;
-  const categoryId = req.params.categoryId;
+  const { categoryId } = req.params;
+  const userId = req.body.userId
 
   try {
     const posts = await Post.findAll({
@@ -236,10 +236,12 @@ export const getPostsUserByCategoryId = async (req, res) => {
     });
 
     const response = posts.map((post) => ({
+      id: post.id,
+      contentText: post.contentText,
+      User: {
+        nickname: post.User.nickname
+      },
       Movie: {
-        id: post.id,
-        contentText: post.contentText,
-        nickname: post.User.nickname,
         title: post.Movie?.title,
       }
     }));
