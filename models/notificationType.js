@@ -3,7 +3,7 @@ import sequelize from '../configs/database.js';
 
 const NotificationType = sequelize.define('NotificationType', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  typeName: DataTypes.STRING,
+  TypeName: DataTypes.STRING,
   messageContent: DataTypes.TEXT,
 }, {
   tableName: 'notificationtype',

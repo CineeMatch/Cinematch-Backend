@@ -17,8 +17,8 @@ export const getFavoriteMovieTypes = async (req, res) => {
   try {
     const movieTypes = await MovieType.findAll({ where: { favoriteMovies: true } });
     const count = movieTypes.length;
-    res.status(200).json({ count, data: movieTypes });
-
+    res.status(200).json({count, data: movieTypes});
+    
   } catch (error) {
     res.status(500).json({ message: "Error fetching favorite movie types" });
   }
@@ -28,7 +28,7 @@ export const getWishListMovieTypes = async (req, res) => {
   try {
     const movieTypes = await MovieType.findAll({ where: { wishlistMovies: true } });
     const count = movieTypes.length;
-    res.status(200).json({ count, data: movieTypes });
+    res.status(200).json({count, data: movieTypes});
 
   } catch (error) {
     res.status(500).json({ message: "Error fetching wish list movie types" });
@@ -39,8 +39,8 @@ export const getWatchedMovieTypes = async (req, res) => {
   try {
     const movieTypes = await MovieType.findAll({ where: { watchedMovies: true } });
     const count = movieTypes.length;
-    res.status(200).json({ count, data: movieTypes });
-
+    res.status(200).json({count, data: movieTypes});
+    
   } catch (error) {
     res.status(500).json({ message: "Error fetching watched movie types" });
   }
@@ -139,11 +139,11 @@ export const isOnProfileMovieType = async (req, res) => {
 
   try {
 
-    const previouslyOnProfile = await MovieType.findAll({
+      const previouslyOnProfile = await MovieType.findAll({
       where: { user_id: userId, is_on_profile: true }
     });
 
-    for (const movieType of previouslyOnProfile) {
+     for (const movieType of previouslyOnProfile) {
       if (!movieType.favorite && !movieType.wishlist && !movieType.watched) {
         await movieType.destroy();
         console.log(`Deleted movieType with movie_id: ${movieType.movie_id}`);
@@ -191,8 +191,8 @@ export const isOnProfileMovieType = async (req, res) => {
 };
 
 export const getMovieTypeOnProfileByUser = async (req, res) => {
-  const userId = req.params.userId;
-
+  const userId = req.params.user_id; 
+  
   if (!userId) {
     return res.status(400).json({ message: "userId is required" });
   }
@@ -205,8 +205,8 @@ export const getMovieTypeOnProfileByUser = async (req, res) => {
       include: [{
         model: Movie,
         attributes: ['id', 'title', 'poster_url']
-      }
-      ]
+       }
+    ]
     });
 
     if (movieTypes.length === 0) {
@@ -242,7 +242,7 @@ export const getUserMovieTypesbyUser = async (req, res) => {
     const movieTypes = await MovieType.findAll({
       where: {
         ...whereCondition,
-        user_id: userId,
+        user_id: userId, 
       },
     });
 
@@ -251,7 +251,7 @@ export const getUserMovieTypesbyUser = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: `Error fetching user movie types - ${error.message}` });
+    res.status(500).json({ message:  `Error fetching user movie types - ${error.message}` });
   }
 };
 
@@ -263,8 +263,15 @@ export const getUserMovieTypesCounts = async (req, res) => {
       return res.status(400).json({ message: "userId is requeid" });
     }
 
-    const [favoriteCount, wishlistCount, watchedCount, favoriteList, wishlistList, watchedList] = await Promise.all([
-      MovieType.count({ where: { user_id: userId, favoriteMovies: true } }) || 0,
+    const [
+      favoriteCount,
+      wishlistCount,
+      watchedCount,
+      favoriteList,
+      wishlistList,
+      watchedList,
+    ] = await Promise.all([
+      MovieType.count({ where: { user_id: userId, favoriteMovies: true } }) || 0 ,
       MovieType.count({ where: { user_id: userId, wishlistMovies: true } } || 0),
       MovieType.count({ where: { user_id: userId, watchedMovies: true } } || 0),
       MovieType.findAll({ where: { user_id: userId, favoriteMovies: true } }),
@@ -282,7 +289,8 @@ export const getUserMovieTypesCounts = async (req, res) => {
       watchedList,
     });
   } catch (error) {
-    res.status(500).json({ message: `Error fetching user movie list counts - ${error.message}` });
+    res.status(500).json({ message:  `Error fetching user movie list counts - ${error.message}` });
   }
 };
+
 

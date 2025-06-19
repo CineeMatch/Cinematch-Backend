@@ -67,7 +67,7 @@ app.use("/api/v1", authRoute);
 
 const port = globalConfig.port || 5000;
 
-sequelize.sync({ alter: false, force: false })
+sequelize.sync()
   .then(async () => {
     console.log('Database synchronized.');
 
@@ -82,7 +82,7 @@ sequelize.sync({ alter: false, force: false })
       await getAllMoviesForDb(
         { shouldUpdate: false },
         {
-          status: () => ({ json: () => { } })
+          status: () => ({ json: () => {} })
         }
       );
     } else {

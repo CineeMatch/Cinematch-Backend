@@ -75,7 +75,7 @@ export const deleteCategory = async (req, res) => {
         const category = await Category.findByPk(id);
         if (category) {
             await category.destroy();
-            res.status(200).json({ message: "Category deleted successfully" });
+            res.status(200).json({message: "Category deleted successfully"});
         } else {
             res.status(404).json({ message: "Category not found " });
         }

@@ -1,6 +1,8 @@
-import CoMatchSuggestion from '../models/coMatchSuggestion.js';
-import User from '../models/user.js';
-import { findMostSimilarUser } from '../utils/recommendationAlgorithm.js';
+import CoMatchSuggestion from "../models/coMatchSuggestion.js";
+import User from "../models/user.js";
+import MovieType from "../models/movieType.js";
+import { findMostSimilarUser } from "../utils/recommendationAlgorithm.js";
+import { Op, Sequelize } from "sequelize";
 
 export const getAllCoMatchSuggestions = async (req, res) => {
   try {
@@ -9,7 +11,7 @@ export const getAllCoMatchSuggestions = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error fetching coMatch suggestions" });
   }
-}
+};
 
 export const getCoMatchSuggestionById = async (req, res) => {
   const { id } = req.params;
@@ -23,22 +25,35 @@ export const getCoMatchSuggestionById = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error fetching coMatch suggestion" });
   }
-}
+};
 
 export const createCoMatchSuggestion = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const similarUser = await findMostSimilarUser(userId);
+    let similarUser = await findMostSimilarUser(userId);
     if (!similarUser || !similarUser.id) {
-      return res.status(404).json({ message: 'No similar user found' });
+      similarUser = await User.findOne({
+        where: { id: { [Op.ne]: userId } }, // kendisi hariç
+        include: [
+          {
+            model: MovieType,
+            required: true,
+            where: { is_on_profile: true },
+          },
+        ],
+        order: Sequelize.literal("RAND()"),
+      });
+      if (!similarUser) {
+        return res.status(404).json({ message: "No similar user found" });
+      }
     }
 
     const matchId = similarUser.id;
 
     // Daha önce önerilmiş mi?
     const alreadySuggested = await CoMatchSuggestion.findOne({
-      where: { user_id: userId, match_id: matchId }
+      where: { user_id: userId, match_id: matchId },
     });
 
     let finalMatchUser = null;
@@ -47,11 +62,11 @@ export const createCoMatchSuggestion = async (req, res) => {
     if (alreadySuggested) {
       const lowestCountMatch = await CoMatchSuggestion.findOne({
         where: { user_id: userId },
-        order: [['shared_movies_count', 'ASC']]
+        order: [["shared_movies_count", "ASC"]],
       });
 
       if (!lowestCountMatch) {
-        return res.status(404).json({ message: 'No match to fallback to' });
+        return res.status(404).json({ message: "No match to fallback to" });
       }
 
       lowestCountMatch.shared_movies_count += 1;
@@ -60,36 +75,36 @@ export const createCoMatchSuggestion = async (req, res) => {
       finalMatchUser = await User.findByPk(lowestCountMatch.match_id);
 
       return res.status(200).json({
-        message: 'Similar user was already suggested. Returned lowest count match instead.',
+        message:
+          "Similar user was already suggested. Returned lowest count match instead.",
         match: {
           ...finalMatchUser.dataValues,
-          shared_movies_count: lowestCountMatch.shared_movies_count
-        }
+          shared_movies_count: lowestCountMatch.shared_movies_count,
+        },
       });
-
     } else {
       const created = await CoMatchSuggestion.create({
         user_id: userId,
         match_id: matchId,
         shared_movies_count: 1,
-        created_at: new Date()
+        created_at: new Date(),
       });
 
       return res.status(201).json({
-        message: 'New match suggestion created',
+        message: "New match suggestion created",
         match: {
-          ...similarUser,
-          shared_movies_count: created.shared_movies_count
-        }
+          ...similarUser.dataValues,
+          shared_movies_count: created.shared_movies_count,
+        },
       });
     }
-
   } catch (error) {
-    console.error('Error in createCoMatchSuggestion:', error);
-    return res.status(500).json({ message: `Error creating coMatchSuggestion ${error.message}` });
+    console.error("Error in createCoMatchSuggestion:", error);
+    return res
+      .status(500)
+      .json({ message: `Error creating coMatchSuggestion ${error.message}` });
   }
 };
-
 
 export const deleteCoMatchSuggestion = async (req, res) => {
   const { id } = req.params;
@@ -104,4 +119,4 @@ export const deleteCoMatchSuggestion = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error deleting coMatch suggestion" });
   }
-}
+};

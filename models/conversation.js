@@ -1,6 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../configs/database.js';
-
+//sor
 const Conversation = sequelize.define('Conversation', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   conversation_id: DataTypes.STRING,

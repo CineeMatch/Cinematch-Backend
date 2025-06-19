@@ -73,7 +73,6 @@ export const deleteConversation = async (req, res) => {
     }
 }
 
-// This function retrieves messages for a specific conversation by its ID, with optional pagination parameters (limit and offset).
 export const getMessagesByChatId = async (req, res) => {
     const { chatId } = req.params;
     const { limit = 20, offset = 0 } = req.query;
@@ -91,5 +90,3 @@ export const getMessagesByChatId = async (req, res) => {
         res.status(500).json({ message: 'Mesajlar getirilemedi.', error: err.message });
     }
 };
-
-

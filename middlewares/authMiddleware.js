@@ -12,12 +12,14 @@ const authMiddleware = async (req, res, next) => {
       where: { id: decoded.id }
     });
 
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     req.token = token;
     req.user = user;
+
     next();
   } catch (error) {
     console.error("Auth middleware error:", error);

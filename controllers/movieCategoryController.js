@@ -1,5 +1,3 @@
-// This controller handles movie category-related operations
-import { where } from "sequelize";
 import MovieCategory from "../models/movieCategory.js";
 
 // This function retrieves all movie categories from the database and sends them as a JSON response.

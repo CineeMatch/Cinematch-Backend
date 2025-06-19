@@ -148,12 +148,11 @@ export const uploadUserAvatar = async (req, res) => {
       where: { id: userId },
       individualHooks: true
     })
-
     if (updatedUser[0] === 0) {
       console.log(updatedUser);
       return res.status(404).json({ message: "User not found or not updated." });
     }
-
+ 
     return res.status(200).json({
       message: "User profile updated successfully.",
       avatarUrl: cloudinaryResult.secure_url // bu kısmı döndür

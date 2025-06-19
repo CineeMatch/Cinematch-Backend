@@ -6,10 +6,9 @@ const Recommendation = sequelize.define('Recommendation', {
   user_id: DataTypes.INTEGER,
   movie_id: DataTypes.INTEGER,
   score: DataTypes.FLOAT,
-  created_at: DataTypes.DATE,
 }, {
   tableName: 'recommendation',
-  timestamps: false,
+  timestamps: true,
 });
 
 export default Recommendation;

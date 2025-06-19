@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../configs/database.js';
 
 const Post = sequelize.define('Post', {
-
+  
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 
   user_id: DataTypes.INTEGER,
@@ -10,10 +10,10 @@ const Post = sequelize.define('Post', {
   movie_id: DataTypes.INTEGER,
 
   contentText: DataTypes.TEXT,
-},
-  {
-    tableName: 'posts',
-    timestamps: true,
-  });
+}, 
+{
+  tableName: 'posts',
+  timestamps: true,
+});
 
 export default Post;

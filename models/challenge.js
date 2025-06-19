@@ -6,12 +6,17 @@ const Challenge = sequelize.define('Challenge', {
   movie_id: DataTypes.INTEGER,
   creator_id: DataTypes.INTEGER,
   opponent_id: DataTypes.INTEGER,
-  status: DataTypes.ENUM('pending', 'answered', 'completed'),
+  end_time: {
+  type: DataTypes.DATE,
+  allowNull: true,
+  defaultValue: new Date(0),
+},
+  status: DataTypes.ENUM('pending', 'accepted','answered', 'completed'),
   duration: DataTypes.INTEGER,
-  created_at: DataTypes.DATE,
 }, {
   tableName: 'challenges',
-  timestamps: false,
+  timestamps: true,
+  createdAt: true,
 });
 
 export default Challenge;

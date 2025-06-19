@@ -1,4 +1,4 @@
-import { createChallenge, deleteChallenge, getAllChallenges, getChallengeByID, getChallengesByUser, updateChallengeStatusAnswered, updateChallengeStatusCompleted } from "../controllers/challengeController.js";
+import { createChallenge, deleteChallenge, getAllChallenges, getChallengeByID, getChallengesByUser, updateChallengeStatusAccepted, updateChallengeStatusAnswered, updateChallengeStatusCompleted } from "../controllers/challengeController.js";
 import express from "express";
 import authMiddleware from "../middlewares/authMiddleware.js";
 
@@ -9,6 +9,7 @@ router.route("/challenge/:id").get(authMiddleware, getChallengeByID);
 router.route("/challenges/user").get(authMiddleware, getChallengesByUser);
 router.route("/challenge/create").post(authMiddleware, createChallenge);
 router.route("/challenge/delete/:id").delete(authMiddleware, deleteChallenge);
+router.route("/challenge/update/accepted/:id").put(authMiddleware, updateChallengeStatusAccepted);
 router.route("/challenge/update/answered/:id").put(authMiddleware, updateChallengeStatusAnswered);
 router.route("/challenge/update/completed/:id").put(authMiddleware, updateChallengeStatusCompleted);
 

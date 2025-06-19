@@ -13,7 +13,7 @@ const MovieType = sequelize.define('MovieType', {
   wishlistMovies: DataTypes.BOOLEAN,
 
   added_at: DataTypes.DATE,
-
+  
   is_on_profile: DataTypes.BOOLEAN,
 }, {
   tableName: 'movietypes',

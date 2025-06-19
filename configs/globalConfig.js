@@ -33,7 +33,7 @@ const globalConfig = {
         password: process.env.SMTP_PASSWORD
     },
 
-    // Cloudinary
+    //Cloudinary
     cloudinary: {
         cloudName: process.env.CLOUDINARY_CLOUD_NAME,
         apiKey: process.env.CLOUDINARY_API_KEY,
