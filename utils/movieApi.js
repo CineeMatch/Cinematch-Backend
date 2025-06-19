@@ -1,8 +1,10 @@
 import Category from '../models/category.js';
 import axios from 'axios';
-import config from '../configs/globalConfig.js';
+import globalConfig from '../configs/globalConfig.js';
+import Platform from '../models/platform.js';
+const api_key  = globalConfig.MOVIE_API_KEY;
 
-const  api_key  = config.MOVIE_API_KEY;
+
 const api_url = "https://api.themoviedb.org/3/movie";
 
 export const getMovieWithPlatforms = async (movieId) => {
@@ -34,6 +36,14 @@ export const getMovieWithPlatforms = async (movieId) => {
 
     const providers = data['watch/providers']?.results?.TR?.flatrate || [];
     const platforms = providers.map(p => p.provider_name);
+    const platformIds = [];
+    for (const platformName of platforms) {
+      let platform = await Platform.findOne({ where: { name: platformName } });
+      if (!platform) {
+        platform = await Platform.create({ name: platformName });
+      }
+      platformIds.push(platform.id);
+    }
 
     const genres = data.genres.map(g => g.name);
     const genreIds = [];
@@ -55,12 +65,12 @@ export const getMovieWithPlatforms = async (movieId) => {
         age_rating: ageRating,
         poster_url: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : null,
         background_url: data.backdrop_path ? `https://image.tmdb.org/t/p/w500${data.backdrop_path}` : null,
-        watch_link: data['watch/providers']?.results?.TR?.link || null,
         director,
         actor: cast,
         external_id: data.id
       },
-      movieCategories: genreIds
+      movieCategories: genreIds,
+      moviePlatforms: platformIds
     };
 
   } catch (error) {
@@ -70,3 +80,26 @@ export const getMovieWithPlatforms = async (movieId) => {
 };
 
 
+export const searchMovieByName = async (movieName) => {
+
+  try {
+    const response = await axios.get('https://api.themoviedb.org/3/search/movie', {
+        headers: { Authorization: `Bearer ${api_key}`,
+          accept: 'application/json'
+ },
+
+      params: {
+        query: movieName,
+        language: 'tr-TR'
+      }
+    });
+    const searchedMovies = response.data.results;
+    const searchedMoviesWithDetails = await Promise.all(searchedMovies.map(async movie => ({
+      ... await getMovieWithPlatforms(movie.id)
+    })));
+
+    return {searchedMovieList:searchedMoviesWithDetails};
+  } catch (error) {
+    console.error('Arama hatası:', error.message);
+  }
+};

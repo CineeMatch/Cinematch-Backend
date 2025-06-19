@@ -47,7 +47,6 @@ export const getPostById = async (req, res) => {
 
 export const getPostsByCategoryId = async (req, res) => {
   const categoryId = req.params.categoryId;
-  console.log("Category ID:", categoryId);
 
   try {
     const posts = await Post.findAll({
@@ -104,7 +103,6 @@ export const getPostByUserId = async (req, res) => {
             ],
         });
     if (posts) {
-      console.log("Posts fetched successfully");
       res.status(200).json(posts);
     } else {
       console.error("Posts not found for this user");
@@ -149,7 +147,6 @@ export const createPost = async (req, res) => {
     } else if ( postCount === 1000) {
         gainBadge(userId, "Post King");
     }
-    console.log("Post created successfully");
     res.status(201).json(newPost);
   } catch (error) {
     console.error("Error creating post:", error);
@@ -173,7 +170,6 @@ export const updatePost = async (req, res) => {
     if (post) {
       post.contentText = contentText;
       await post.save();
-      console.log("Post updated successfully");
       res.status(200).json(post);
     } else {
       console.error("Post not found");
@@ -236,17 +232,19 @@ export const getPostsUserByCategoryId = async (req, res) => {
         });
 
         const response = posts.map((post) => ({
-            id: post.id,
-            contentText: post.contentText,
-            nickname: post.User.nickname,
-            movieName: post.Movie?.title,
-        }));
+      Movie: {
+        id: post.id,
+        contentText: post.contentText,
+        nickname: post.User.nickname,
+        title: post.Movie?.title,
+      }
+    }));
 
-        res.status(200).json(response);
-    } catch (error) {
-        console.error("Error fetching posts by user and category:", error);
-        res
-            .status(500)
-            .json({ message: `Error fetching posts by user and category: ${error.message}` });
-    }
+    res.status(200).json(response);
+  } catch (error) {
+    console.error("Error fetching posts by user and category:", error);
+    res
+      .status(500)
+      .json({ message: `Error fetching posts by user and category: ${error.message}` });
+  }
 }

@@ -83,7 +83,6 @@ export const createFriend = async (req, res) => {
   try {
     const userId = req.user.id;
     const { friendId } = req.params;
-    console.log("Friend ID from request body:", friendId);
     if (!userId || !friendId) {
       return res
         .status(400)
@@ -184,7 +183,6 @@ export const createFriendForNickname = async (req, res) => {
     });
 
     const type_id = 1;
-    console.log("Friend ID from request body:",type_id,userId, friendId);
     await createNotification(type_id, userId, friendId);
   } catch (error) {
     console.error("Create Friend Error:", error);
@@ -229,9 +227,7 @@ export const deleteFriend = async (req, res) => {
 export const acceptFriendRequest = async (req, res) => {
   try {
     const friendId = req.body.friendId;
-    console.log("Friend ID from request body:", friendId);
     const userId = req.user.id;
-    console.log("User ID from token:", userId);
 
     const friendship = await Friend.findOne({
       where: {
@@ -241,7 +237,6 @@ export const acceptFriendRequest = async (req, res) => {
       },
     });
 
-    console.log("Friendship found:", friendship);
 
     const reverseFriendship = await Friend.findOne({
       where: {

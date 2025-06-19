@@ -26,7 +26,6 @@ export const gainLevel = async (userId, type) => {
 
         await User.update({ level }, { where: { id: userId } });
 
-        console.log(`User ${userId} has been leveled up to level ${level}`);
         return level;
     } catch (error) {
         console.error(`Error leveling up user ${userId}:`, error);

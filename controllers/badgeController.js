@@ -91,7 +91,6 @@ export const createBadgeFromFrontend = async (req, res) => {
             folder: "MR-WA-Badge",
             resource_type: "auto",
         });
-        console.log("Cloudinary upload result:", cloudinaryResult);
 
         const newBadge = await Badge.create({ name, image_url: cloudinaryResult.secure_url, image_url_public_id: cloudinaryResult.public_id, description });
         return res.status(201).json(newBadge);

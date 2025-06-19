@@ -17,6 +17,8 @@ import NotificationType from '../models/notificationType.js';
 import Challenge from '../models/challenge.js';
 import ChallangeQuestion from '../models/challengeQuestion.js';
 import MovieType from '../models/movieType.js';
+import Platform from '../models/platform.js';
+import MoviePlatform from '../models/moviePlatform.js';
 
 
 export default function defineAssociations() {
@@ -37,6 +39,28 @@ export default function defineAssociations() {
     otherKey: 'movie_id',
   });
 
+  Movie.belongsTo(Platform, {
+    as: 'mainPlatform',
+    foreignKey: 'platformId'
+  });
+  Platform.hasMany(Movie, {
+    as: 'movies',
+    foreignKey: 'platformId'
+  });
+
+  // Movie <-> Platform (many-to-many)
+  Movie.belongsToMany(Platform, {
+    through: MoviePlatform,
+    as: 'platforms',
+    foreignKey: 'movie_id',
+    otherKey: 'platform_id',
+  });
+  Platform.belongsToMany(Movie, {
+    through: MoviePlatform,
+    as: 'moviesWithRelation',
+    foreignKey: 'platform_id',
+    otherKey: 'movie_id',
+  });
   // userBadges -> Users, Badges
   User.hasMany(UserBadge, { foreignKey: 'user_id' });
   Badge.hasMany(UserBadge, { foreignKey: 'badge_id' });
@@ -92,6 +116,8 @@ export default function defineAssociations() {
   // ChallangeQuestion -> Challenges, Users
   Challenge.hasMany(ChallangeQuestion, { foreignKey: 'challenge_id' });
   Challenge.belongsTo(Movie, {foreignKey: 'movie_id',as: 'movie'});
+  Challenge.belongsTo(User, { foreignKey: 'creator_id', as: 'creator' });
+  Challenge.belongsTo(User, { foreignKey: 'opponent_id', as: 'opponent' });
   User.hasMany(ChallangeQuestion, { foreignKey: 'created_by' });
   User.hasMany(ChallangeQuestion, { foreignKey: 'directed_to' });
 

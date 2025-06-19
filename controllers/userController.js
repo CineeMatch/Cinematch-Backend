@@ -95,9 +95,6 @@ export const updateUser = async (req, res) => {
     });
 
     if (updatedUser[0] === 0) {
-      console.log("Bu çalışıyor");
-      console.log(updatedUser);
-      console.log(userId);
       return res.status(404).json({ message: "User not found or not updated." });
     }
 
@@ -122,7 +119,6 @@ export const updateActiveUser = async (req, res) => {
     });
 
     if (updatedUser[0] === 0) {
-      console.log(updatedUser);
       return res.status(404).json({ message: "User not found or not updated." });
     }
 
@@ -149,7 +145,6 @@ export const uploadUserAvatar = async (req, res) => {
       individualHooks: true
     })
     if (updatedUser[0] === 0) {
-      console.log(updatedUser);
       return res.status(404).json({ message: "User not found or not updated." });
     }
  

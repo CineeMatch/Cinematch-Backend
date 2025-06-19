@@ -88,7 +88,6 @@ export async function findMostSimilarUser(userId) {
         }
     }
 
-    console.log(`Most similar user to ${userId} is ${bestUser ? bestUser.id : 'N/A'} with score ${bestScore}`);
 
     return bestUser;
 }
@@ -128,7 +127,6 @@ export async function getRecommendationsFromSimilarUser(currentUserId, similarUs
         }
     }
 
-    console.log(`Fetching recommendations from similar user ${recommendations}...`);
     return recommendations;
 }
 

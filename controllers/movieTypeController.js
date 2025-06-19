@@ -146,7 +146,6 @@ export const isOnProfileMovieType = async (req, res) => {
      for (const movieType of previouslyOnProfile) {
       if (!movieType.favorite && !movieType.wishlist && !movieType.watched) {
         await movieType.destroy();
-        console.log(`Deleted movieType with movie_id: ${movieType.movie_id}`);
       } else {
         movieType.is_on_profile = false;
         await movieType.save();

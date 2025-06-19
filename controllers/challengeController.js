@@ -1,8 +1,7 @@
 import { Op } from "sequelize";
 import Challenge from "../models/challenge.js";
 import Movie from "../models/movie.js";
-import NotificationType from "../models/notificationType.js";
-import Notification from "../models/notification.js";
+import { createNotification } from "../utils/notificationUtil.js";
 
 export const getAllChallenges = async (req, res) => {
   try {
@@ -116,26 +115,7 @@ export const createChallenge = async (req, res) => {
       creator_id,
       status: "pending",
     });
-
-    // NotificationType bul ya da oluştur
-    let notificationType = await NotificationType.findOne({
-      where: { TypeName: "Challenge" },
-    });
-
-    if (!notificationType) {
-      notificationType = await NotificationType.create({
-        TypeName: "Challenge",
-        messageContent: "You have a new challenge!",
-      });
-    }
-
-    await Notification.create({
-      sender_id: creator_id,
-      reciver_id: opponent_id,
-      type_id: notificationType.id,
-      isRead: false,
-    });
-
+    await createNotification(3,creator_id,opponent_id);
     return res.status(201).json({
       message: "New challenge created successfully!",
       challenge: newChallenge,

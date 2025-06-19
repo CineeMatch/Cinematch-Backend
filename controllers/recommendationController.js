@@ -83,7 +83,6 @@ export const getRecommendationMovieForCurrentUser = async (req, res) => {
   try {
 
     const recommendationMovies = await recommendMoviesForUser(userId);
-    console.log("Recommendation Movies:", recommendationMovies);
     if (!recommendationMovies || recommendationMovies.length === 0) {
       return res.status(404).json({ message: "No recommendations found for this user." });
     }
