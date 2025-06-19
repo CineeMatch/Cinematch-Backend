@@ -119,9 +119,14 @@ export default function defineAssociations() {
   Comment.hasMany(CommentLike, { foreignKey: 'comment_id' });
 
   // Notification -> User, NotificationType
-  User.hasMany(Notification, { foreignKey: 'sender_id', as: 'notificationsSent' });
-  User.hasMany(Notification, { foreignKey: 'reciver_id', as: 'notificationsReceived' }); // Not: reciver → receiver olarak düzeltilmeli
-  NotificationType.hasMany(Notification, { foreignKey: 'type_id' });
+User.hasMany(Notification, { foreignKey: 'sender_id', as: 'notificationsSent' });
+User.hasMany(Notification, { foreignKey: 'reciver_id', as: 'notificationsReceived' });
+Notification.belongsTo(User, { foreignKey: 'sender_id', as: 'sender' });
+Notification.belongsTo(User, { foreignKey: 'reciver_id', as: 'receiver' });
+Notification.belongsTo(NotificationType, {
+  foreignKey: 'type_id',
+  as: 'type' 
+});
 
   // Challenge -> User, Movie
   Movie.hasMany(Challenge, { foreignKey: 'movie_id' });
