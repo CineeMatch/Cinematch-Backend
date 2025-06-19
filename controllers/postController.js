@@ -231,11 +231,12 @@ export const getPostsUserByCategoryId = async (req, res) => {
             ],
         });
 
-        const response = posts.map((post) => ({
-      Movie: {
+        const response = posts.map((post) => ({        
         id: post.id,
         contentText: post.contentText,
         nickname: post.User.nickname,
+      Movie: {
+
         title: post.Movie?.title,
       }
     }));

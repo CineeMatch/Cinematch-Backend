@@ -15,7 +15,7 @@ import CommentLike from '../models/commentLike.js';
 import Notification from '../models/notification.js';
 import NotificationType from '../models/notificationType.js';
 import Challenge from '../models/challenge.js';
-import ChallangeQuestion from '../models/challengeQuestion.js';
+import ChallengeQuestion from '../models/challengeQuestion.js';
 import MovieType from '../models/movieType.js';
 import Platform from '../models/platform.js';
 import MoviePlatform from '../models/moviePlatform.js';
@@ -113,13 +113,13 @@ export default function defineAssociations() {
   User.hasMany(Challenge, { foreignKey: 'creator_id', as: 'createdChallenges' });
   User.hasMany(Challenge, { foreignKey: 'opponent_id', as: 'opponentChallenges' });
 
-  // ChallangeQuestion -> Challenges, Users
-  Challenge.hasMany(ChallangeQuestion, { foreignKey: 'challenge_id' });
+  // ChallengeQuestion -> Challenges, Users
+  Challenge.hasMany(ChallengeQuestion, { foreignKey: 'challenge_id' });
   Challenge.belongsTo(Movie, {foreignKey: 'movie_id',as: 'movie'});
   Challenge.belongsTo(User, { foreignKey: 'creator_id', as: 'creator' });
   Challenge.belongsTo(User, { foreignKey: 'opponent_id', as: 'opponent' });
-  User.hasMany(ChallangeQuestion, { foreignKey: 'created_by' });
-  User.hasMany(ChallangeQuestion, { foreignKey: 'directed_to' });
+  User.hasMany(ChallengeQuestion, { foreignKey: 'created_by' });
+  User.hasMany(ChallengeQuestion, { foreignKey: 'directed_to' });
 
   // MovieTypes.movie_id > MovieCategories.id (mantıksal olarak movie_id -> Movie.id olması gerek)
   Movie.hasMany(MovieType, { foreignKey: 'movie_id' });
@@ -134,5 +134,9 @@ export default function defineAssociations() {
   Movie.hasMany(MovieCategory, { foreignKey: 'movie_id' });
   MovieCategory.belongsTo(Category, { foreignKey: 'category_id' });
   MovieCategory.belongsTo(Movie, { foreignKey: 'movie_id' });
+
+  Notification.belongsTo(User, { foreignKey: 'sender_id', as: 'sender' });
+  Notification.belongsTo(User, { foreignKey: 'reciver_id', as: 'receiver' });
+  Notification.belongsTo(NotificationType, {foreignKey: 'type_id',as: 'type' });
 
 }

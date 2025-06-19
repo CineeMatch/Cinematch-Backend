@@ -1,9 +1,9 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../configs/database.js';
 //sor
-const ChallangeQuestion = sequelize.define('ChallangeQuestion', {
+const ChallengeQuestion = sequelize.define('ChallengeQuestion', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  challange_id: DataTypes.INTEGER,
+  challenge_id: DataTypes.INTEGER,
   created_by: DataTypes.INTEGER,
   directed_to: DataTypes.INTEGER,
   questionText: DataTypes.TEXT,
@@ -15,4 +15,4 @@ const ChallangeQuestion = sequelize.define('ChallangeQuestion', {
   timestamps: false,
 });
 
-export default ChallangeQuestion;
+export default ChallengeQuestion;

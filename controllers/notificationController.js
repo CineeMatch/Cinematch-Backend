@@ -22,25 +22,39 @@ export const getNotification = async (req, res) => {
     }
   };
   
-  export const getNotificationsForUser = async (req, res) => {
-    const user=req.user.id
-    try {
-      const notifications = await Notification.findAll({
-        where: {
-          reciver_id:user
-        }
-      });
-  
-      if (notifications.length === 0) {
-        return res.status(404).json({ message: "There isn't any notification for this user." });
-      }
-  
-      return res.status(200).json({ message: "Notifications listed successfully.", notifications });
-    } catch (error) {
-      console.error('Fetch Error:', error);
-      return res.status(500).json({ error: "Notifications couldn't be listed." });
-    }
-  };
+ export const getNotificationsForUser = async (req, res) => {
+  const user = req.user.id;
+  try {
+    const notifications = await Notification.findAll({
+      where: {
+        reciver_id: user,
+      },
+      include: [
+        {
+          model: User,
+          as: 'sender',
+          attributes: ['id', 'nickname'],
+        },
+        {
+          model: User,
+          as: 'receiver',
+          attributes: ['id', 'nickname'],
+        },
+        {
+          model: NotificationType,
+          as: 'type',
+        },
+      ],
+      order: [['updatedAt', 'DESC']],
+    });
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    console.error("Notification fetch error:", error);
+    res.status(500).json({ error: 'Bildirimler alınamadı.' });
+  }
+};
+
   
   export const createNotification = async (req, res) => {
     const sender_id=req.user.id;
