@@ -2,7 +2,7 @@ import User from '../models/user.js';
 
 export const gainLevel = async (userId, type) => {
     try {
-        const point = 0;
+        let point = 0;
         const user = await User.findByPk(userId);
         if (!user) {
             throw new Error(`User with ID ${userId} not found`);
@@ -26,8 +26,8 @@ export const gainLevel = async (userId, type) => {
 
         await User.update({ level }, { where: { id: userId } });
 
-        console.log(`User ${userId} has been leveled up to level ${newLevel}`);
-        return newLevel;
+        console.log(`User ${userId} has been leveled up to level ${level}`);
+        return level;
     } catch (error) {
         console.error(`Error leveling up user ${userId}:`, error);
         throw error;

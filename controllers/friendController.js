@@ -2,6 +2,8 @@ import Friend from "../models/friend.js";
 import User from "../models/user.js";
 import { createNotification } from "./notificationController.js";
 import { Op } from "sequelize";
+import { gainBadge } from "../utils/gainBadge.js";
+import { gainLevel } from "../utils/gainLevel.js";
 
 export const getAllFriends = async (req, res) => {
   try {
@@ -80,9 +82,9 @@ export const getFriendById = async (req, res) => {
 export const createFriend = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { friendId } = req.body;
+    const { friendId } = req.params;
     console.log("Friend ID from request body:", friendId);
-    if (!userId || !friend_id) {
+    if (!userId || !friendId) {
       return res
         .status(400)
         .json({ message: "userId and friendId are required." });
@@ -113,8 +115,8 @@ export const createFriend = async (req, res) => {
       return res.status(400).json({ message: "Friendship already exists." });
     }
     const newFriend = await Friend.create({
-      user_id: userId,
-      friend_id: friendId,
+      user_id: friendId,
+      friend_id: userId,
       status: "pending",
     });
 
@@ -185,27 +187,12 @@ export const createFriendForNickname = async (req, res) => {
     }
 
     const newFriend = await Friend.create({
-      user_id: userId,
-      friend_id: friendId,
+      user_id: friendId,
+      friend_id: userId,
       status: "pending",
     });
 
-    // const existingNotification = await Notification.findOne({
-    //   where: {
-    //     sender_id: userId,
-    //     reciver_id: friendId,
-    //     type_id,
-    //   },
-    // });
-
-    // if (!existingNotification) {
-    //   await Notification.create({
-    //     sender_id: userId,
-    //     reciver_id: friendId,
-    //     type_id,
-    //     isRead: false,
-    //   });
-    // }
+ 
     const type_id = 1;
     req.body = { reciver_id: friendId, type_id };
 
@@ -273,9 +260,18 @@ export const acceptFriendRequest = async (req, res) => {
 
     const friendship = await Friend.findOne({
       where: {
-        user_id: friendId, // Gönderen
-        friend_id: userId, // Kabul eden
+        user_id: friendId,
+        friend_id: userId,
         status: "pending",
+      },
+    });
+
+    console.log("Friendship found:", friendship);
+
+    const reverseFriendship = await Friend.findOne({
+      where: {
+        user_id: friendship.friend_id,
+        friend_id: friendship.user_id,
       },
     });
 
@@ -293,24 +289,54 @@ export const acceptFriendRequest = async (req, res) => {
       return res
         .status(400)
         .json({ message: "Friend request is not pending." });
-    }
+    };
 
-    friendship.status = "accepted";
-    await friendship.save();
-
-    const reverseFriendship = await Friend.findOne({
-      where: {
-        user_id: friendship.friend_id,
-        friend_id: friendship.user_id,
-      },
-    });
 
     if (!reverseFriendship) {
+      
+      friendship.status = "accepted";
+      await friendship.save();
+
       await Friend.create({
         user_id: friendship.friend_id,
         friend_id: friendship.user_id,
         status: "accepted",
       });
+    }
+    friendship.status = "accepted";
+    await friendship.save();
+
+
+    const userCount = await Friend.count({ where: { user_id: userId } });
+
+        gainLevel(userId, "comment");
+
+    if (userCount === 1) {
+        gainBadge(userId, "Lone Wolf");
+    } else if (userCount === 20) {
+        gainBadge(userId, "Social Icon");
+    } else if (userCount === 50) {
+        gainBadge(userId, "Social Butterfly");
+    } else if (userCount === 100) {
+        gainBadge(userId, "Friend Collector");
+    } else if (userCount === 500) {
+        gainBadge(userId, "Network Builder");
+    }
+
+    const friendCount = await Friend.count({ where: { friend_id: friendId } });
+
+        gainLevel(friendId, "comment");
+
+    if (friendCount === 1) {
+        gainBadge(friendId, "Lone Wolf");
+    } else if (friendCount === 20) {
+        gainBadge(friendId, "Social Icon");
+    } else if (friendCount === 50) {
+        gainBadge(friendId,  "Social Butterfly");
+    } else if (friendCount === 100) {
+        gainBadge(friendId, "Friend Collector");
+    } else if (friendCount === 500) {
+        gainBadge(friendId, "Network Builder");
     }
 
     res.status(200).json({
@@ -318,7 +344,7 @@ export const acceptFriendRequest = async (req, res) => {
     });
   } catch (error) {
     console.error("Accept Friend Request Error:", error);
-    res.status(500).json({ message: "Failed to accept friend request." });
+    res.status(500).json({ message: `Failed to accept friend request. ${error.message}` });
   }
 };
 

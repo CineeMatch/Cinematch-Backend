@@ -66,9 +66,9 @@ export const createComment = async (req, res) => {
 
     if (commentCount === 1) {
         gainBadge(user_id, "First Comment");
-    } else if (commentCount === 50) {
+    } else if (commentCount === 5) {
         gainBadge(user_id, "Commenter");
-    } else if (commentCount === 100) {
+    } else if (commentCount === 10) {
         gainBadge(user_id, "Criticiser");
     } else if (commentCount === 500) {
         gainBadge(user_id, "Comment Machine");

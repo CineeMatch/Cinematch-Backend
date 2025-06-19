@@ -5,6 +5,9 @@ import Category from "../models/category.js";
 import Comment from "../models/comment.js";
 import CommentLike from "../models/commentLike.js";
 import Like from "../models/like.js";
+import Friend from "../models/friend.js";
+import { gainBadge } from "../utils/gainBadge.js";
+import { gainLevel } from "../utils/gainLevel.js";
 
 export const getAllPosts = async (req, res) => {
   try {
@@ -131,6 +134,21 @@ export const createPost = async (req, res) => {
       movie_id,
       contentText: contentText,
     });
+    const postCount = await Post.count({ where: { user_id: userId } });
+
+        gainLevel(userId, "comment");
+
+    if ( postCount === 1) {
+        gainBadge(userId, "First Post");
+    } else if ( postCount === 50) {
+        gainBadge(userId, "Sharer");
+    } else if ( postCount === 100) {
+        gainBadge(userId, "Poster");
+    } else if ( postCount === 500) {
+        gainBadge(userId, "Post Storm");
+    } else if ( postCount === 1000) {
+        gainBadge(userId, "Post King");
+    }
     console.log("Post created successfully");
     res.status(201).json(newPost);
   } catch (error) {

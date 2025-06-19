@@ -1,8 +1,8 @@
 import CommentLike from '../models/commentLike.js';
 import Comment from '../models/comment.js';
-import { createNotification } from './notificationController.js';
 import User from '../models/user.js';
 import { where } from 'sequelize';
+import {createNotification} from '../utils/notificationUtil.js';
 
 export const getAllCommentLikes = async (req, res) => {
     try {
@@ -43,7 +43,7 @@ export const getCommentLikesByCommentId = async (req, res) => {
         });
     } catch (error) {
         console.error("Fetch error:", error);
-        res.status(500).json({ message: `Error fetching likes for comment ${comment_id}: ${error.message}` });
+        res.status(500).json({ message: `Error fetching likes for comment ${commentId}: ${error.message}` });
     }
 };
 
@@ -64,6 +64,7 @@ export const createCommentLike = async (req, res) => {
     try {
         const userId = req.user.id;
         const {comment_id } = req.body;
+        const type_id = 2; 
         if (!userId || !comment_id) {
             return res.status(400).json({ message: "userId and commentId are required." });
         }
@@ -90,21 +91,7 @@ export const createCommentLike = async (req, res) => {
 
         const commentOwnerId = existingComment.user_id;
 
-        if (commentOwnerId !== userId) {
-        req.body = {
-            reciver_id: commentOwnerId,
-            type_id: 2
-        };
-        console.log("Notification body:", req.body);
-
-        const notification = {
-            status: (code) => ({
-            json: (data) => console.log(`[Notification] ${code}:`, data)
-            })
-        };
-
-        await createNotification(req, notification);
-        }
+        await createNotification(type_id, userId, commentOwnerId);
         res.status(201).json(newCommentLike);
     } catch (error) {
         res.status(500).json({ message: `Error creating comment like ${error.message} ` });

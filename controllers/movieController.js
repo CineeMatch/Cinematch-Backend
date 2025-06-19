@@ -13,6 +13,7 @@ export const getAllMovies = async (req, res) => {
 
 export const getMovie=async(req,res)=>{
     try {
+      const { id } = req.params;
         const movie=await Movie.findByPk(id);
         if(!movie){
             return res.status(404).json({ error: `Movie doesn't exist.` });
