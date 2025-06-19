@@ -4,7 +4,8 @@ import CommentLike from "../models/commentLike.js";
 import User from "../models/user.js";
 import { gainBadge } from "../utils/gainBadge.js";
 import { gainLevel } from "../utils/gainLevel.js";
-
+import {createNotification} from "../utils/notificationUtil.js";
+import Post from "../models/post.js";
 // This function retrieves all Comments from the database and sends them as a JSON response.
 export const getAllComments = async (req, res) => {
   try {
@@ -60,6 +61,16 @@ export const createComment = async (req, res) => {
       user_id,
       commentText,
     });
+    const postOwner = await Post.findOne({
+      where: { id: post_id },
+      attributes: ['user_id'],
+    });
+
+    const postOwnerId = postOwner.user_id;
+    const type_id = 4;
+
+    await createNotification(type_id, user_id, postOwnerId)
+
     const commentCount = await Comment.count({ where: { user_id } });
 
         gainLevel(user_id, "comment");
@@ -86,7 +97,7 @@ export const createComment = async (req, res) => {
     return res.status(201).json(fullComment);
   } catch (error) {
     console.error("Error creating comment:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: `Internal server error ${error.message}` });
   }
 };
 

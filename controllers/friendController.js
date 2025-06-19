@@ -1,6 +1,6 @@
 import Friend from "../models/friend.js";
 import User from "../models/user.js";
-import { createNotification } from "./notificationController.js";
+import { createNotification } from "../utils/notificationUtil.js";
 import { Op } from "sequelize";
 import { gainBadge } from "../utils/gainBadge.js";
 import { gainLevel } from "../utils/gainLevel.js";
@@ -123,16 +123,7 @@ export const createFriend = async (req, res) => {
     const type_id = 1;
     req.body = { reciver_id: friendId, type_id };
 
-    const notification = {
-      status: (code) => ({
-        json: (data) => console.log(`[Notification Response] ${code}:`, data),
-      }),
-    };
-
-    await createNotification(req, notification);
-    res
-      .status(201)
-      .json({ message: "Friend request created", friendRequest: newFriend });
+      await createNotification(type_id, userId, friendId);
   } catch (error) {
     console.error("Create Friend Error:", error);
     res
@@ -192,25 +183,9 @@ export const createFriendForNickname = async (req, res) => {
       status: "pending",
     });
 
- 
     const type_id = 1;
-    req.body = { reciver_id: friendId, type_id };
-
-    const notification = {
-      status: (code) => ({
-        json: (data) => console.log(`[Notification Response] ${code}:`, data),
-      }),
-    };
-
-    await createNotification(req, notification);
-    res
-      .status(201)
-      .json({ message: "Friend request created", friendRequest: newFriend });
-
-    return res.status(201).json({
-      message: "Friend request sent successfully.",
-      friend: newFriend,
-    });
+    console.log("Friend ID from request body:",type_id,userId, friendId);
+    await createNotification(type_id, userId, friendId);
   } catch (error) {
     console.error("Create Friend Error:", error);
     res
