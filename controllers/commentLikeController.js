@@ -53,7 +53,7 @@ export const getUserCommentLikeOnComment=async(req,res)=>{
     const { commentId } = req.params;
     try {
         const commentLike=await CommentLike.findOne({where:{comment_id:commentId, user_id:user }});
-        return res.status(200).json({"CommentLike":commentLike});
+        return res.status(200).json({ liked: !!commentLike });
     } catch (error) {
         console.error('Fetch Error:', error);
         return res.status(500).json({ error: 'Like cannot be found.' });
@@ -92,11 +92,16 @@ export const createCommentLike = async (req, res) => {
         const commentOwnerId = existingComment.user_id;
 
         await createNotification(type_id, userId, commentOwnerId);
-        res.status(201).json(newCommentLike);
+        res.status(201).json({
+            like: newCommentLike,
+            liked: true,
+            message: "Comment liked successfully."
+        });
     } catch (error) {
         res.status(500).json({ message: `Error creating comment like ${error.message} ` });
     }
 }
+
 
 export const deleteCommentLike = async (req, res) => {
     const userId = req.user.id;
