@@ -205,38 +205,39 @@ export const deletePost = async (req, res) => {
 };
 
 export const getPostsUserByCategoryId = async (req, res) => {
-    const userId = req.user.id;
-    const categoryId = req.params.categoryId;
+  const { categoryId } = req.params;
+  const userId = req.body.userId
 
-    try {
-        const posts = await Post.findAll({
-            where: { user_id: userId },
-            include: [
-                {
-                    model: Movie,
-                    required: true,
-                    include: [
-                        {
-                            model: Category,
-                            as: "categories",
-                            where: { id: categoryId },
-                            required: true,
-                        },
-                    ],
-                },
-                {
-                    model: User,
-                    attributes: ["nickname"],
-                },
-            ],
-        });
+  try {
+    const posts = await Post.findAll({
+      where: { user_id: userId },
+      include: [
+        {
+          model: Movie,
+          required: true,
+          include: [
+            {
+              model: Category,
+              as: "categories",
+              where: { id: categoryId },
+              required: true,
+            },
+          ],
+        },
+        {
+          model: User,
+          attributes: ["nickname"],
+        },
+      ],
+    });
 
-        const response = posts.map((post) => ({        
-        id: post.id,
-        contentText: post.contentText,
-        nickname: post.User.nickname,
+    const response = posts.map((post) => ({
+      id: post.id,
+      contentText: post.contentText,
+      User: {
+        nickname: post.User.nickname
+      },
       Movie: {
-
         title: post.Movie?.title,
       }
     }));

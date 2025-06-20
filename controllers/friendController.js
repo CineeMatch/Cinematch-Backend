@@ -114,8 +114,8 @@ export const createFriend = async (req, res) => {
       return res.status(400).json({ message: "Friendship already exists." });
     }
     const newFriend = await Friend.create({
-      user_id: friendId,
-      friend_id: userId,
+      user_id: userId,
+      friend_id: friendId,
       status: "pending",
     });
 
@@ -228,7 +228,7 @@ export const acceptFriendRequest = async (req, res) => {
   try {
     const friendId = req.body.friendId;
     const userId = req.user.id;
-
+    console.log("Accepting friend request for user:", userId, "from friend:", friendId);
     const friendship = await Friend.findOne({
       where: {
         user_id: friendId,
@@ -237,7 +237,7 @@ export const acceptFriendRequest = async (req, res) => {
       },
     });
 
-
+    console.log("Friendship:", friendship);
     const reverseFriendship = await Friend.findOne({
       where: {
         user_id: friendship.friend_id,

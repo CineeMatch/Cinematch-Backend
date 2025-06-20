@@ -11,6 +11,6 @@ router.route("/posts/user/:userId").get(authMiddleware,getPostByUserId);
 router.route("/post/create").post(authMiddleware,createPost);
 router.route("/post/update/:id").put(authMiddleware,updatePost);
 router.route("/post/delete/:id").delete(authMiddleware,deletePost);
-router.route("/posts/user/category/:categoryId").get(authMiddleware, getPostsUserByCategoryId);
+router.route("/posts/user/category/:categoryId").post(authMiddleware, getPostsUserByCategoryId);
 
 export default router;
