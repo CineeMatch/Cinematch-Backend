@@ -46,7 +46,6 @@ export const getAllLikes = async (req, res) => {
            if (!likeOwner) {
               return res.status(404).json({ message: "Post not found." });
           }
-          console.log("likeOwnerId", likeOwner.user_id);
 
           await createNotification(type_id, user, likeOwner.user_id);
           return res.status(201).json({message:"This post liked successfully.",like:newLike});
